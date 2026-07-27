@@ -17,6 +17,7 @@ From the hub, pick:
 
 - **Parts of the computer** — explore lab PC parts
 - **Fun with Words** — type themed words that drop from a rainbow
+- **Jumbled Words** — unscramble letter tiles (Easy / Medium)
 
 ## Play on iPad (same Wi‑Fi)
 
@@ -47,7 +48,7 @@ Example: `http://192.168.1.20:5173`
 | `npm run build` | Production build |
 | `npm run preview` | Preview the build with `--host` |
 
-Progress (lab stars + word level unlocks) is saved in the browser only — no database. A refresh keeps her place on that device.
+Progress (lab stars, word level unlocks, and jumbled best stars) is saved in the browser only — no database.
 
 UI mockup reference: `docs/superpowers/mockups/fun-with-words-mockup.html`
 

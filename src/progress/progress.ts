@@ -1,7 +1,9 @@
+import type { JumbledDifficulty } from '../content/jumbledWords'
 import { LAB_ORDER } from '../content/stations'
 import { WORD_LEVEL_ORDER, type WordLevelId } from '../content/wordLevels'
 import type {
   AppProgress,
+  JumbledProgress,
   LabProgress,
   LabStationId,
   StationId,
@@ -20,8 +22,19 @@ export function emptyWordsProgress(): WordsProgress {
   }
 }
 
+export function emptyJumbledProgress(): JumbledProgress {
+  return {
+    completedDifficulties: [],
+    bestStars: {},
+  }
+}
+
 export function emptyProgress(): AppProgress {
-  return { lab: { completed: [] }, words: emptyWordsProgress() }
+  return {
+    lab: { completed: [] },
+    words: emptyWordsProgress(),
+    jumbled: emptyJumbledProgress(),
+  }
 }
 
 function normalizeWords(raw: Partial<WordsProgress> | undefined): WordsProgress {
@@ -38,6 +51,20 @@ function normalizeWords(raw: Partial<WordsProgress> | undefined): WordsProgress 
   }
 }
 
+function normalizeJumbled(
+  raw: Partial<JumbledProgress> | undefined,
+): JumbledProgress {
+  const completed = (raw?.completedDifficulties ?? []).filter(
+    (d): d is JumbledDifficulty => d === 'easy' || d === 'medium',
+  )
+  const bestStars: JumbledProgress['bestStars'] = {}
+  for (const d of ['easy', 'medium'] as JumbledDifficulty[]) {
+    const stars = raw?.bestStars?.[d]
+    if (stars === 1 || stars === 2 || stars === 3) bestStars[d] = stars
+  }
+  return { completedDifficulties: completed, bestStars }
+}
+
 export function loadProgress(): AppProgress {
   try {
     const raw = localStorage.getItem(KEY)
@@ -47,6 +74,7 @@ export function loadProgress(): AppProgress {
       return {
         lab: { completed: parsed.completed as StationId[] },
         words: emptyWordsProgress(),
+        jumbled: emptyJumbledProgress(),
       }
     }
     const lab = parsed.lab as LabProgress | undefined
@@ -54,6 +82,7 @@ export function loadProgress(): AppProgress {
     return {
       lab: { completed: lab.completed },
       words: normalizeWords(parsed.words as WordsProgress | undefined),
+      jumbled: normalizeJumbled(parsed.jumbled as JumbledProgress | undefined),
     }
   } catch {
     return emptyProgress()
@@ -124,4 +153,20 @@ export function completeWordLevel(
 
 export function recordTypedWord(words: WordsProgress): WordsProgress {
   return { ...words, wordsTypedCount: words.wordsTypedCount + 1 }
+}
+
+export function recordJumbledRound(
+  jumbled: JumbledProgress,
+  difficulty: JumbledDifficulty,
+  stars: 1 | 2 | 3,
+): JumbledProgress {
+  const completedDifficulties = jumbled.completedDifficulties.includes(difficulty)
+    ? jumbled.completedDifficulties
+    : [...jumbled.completedDifficulties, difficulty]
+  const prev = jumbled.bestStars[difficulty] ?? 0
+  const bestStars = {
+    ...jumbled.bestStars,
+    [difficulty]: Math.max(prev, stars) as 1 | 2 | 3,
+  }
+  return { completedDifficulties, bestStars }
 }

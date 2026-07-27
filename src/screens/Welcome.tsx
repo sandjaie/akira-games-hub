@@ -1,9 +1,13 @@
 import { Rainbow } from '../components/Rainbow'
 import { EXPLORER_NAME } from '../content/explorer'
 
-type Props = { onLab: () => void; onWords: () => void }
+type Props = {
+  onLab: () => void
+  onWords: () => void
+  onJumbled: () => void
+}
 
-export function Welcome({ onLab, onWords }: Props) {
+export function Welcome({ onLab, onWords, onJumbled }: Props) {
   return (
     <main className="screen welcome hub">
       <Rainbow size="small" />
@@ -29,13 +33,13 @@ export function Welcome({ onLab, onWords }: Props) {
             <span className="hub-blurb">Type fun words!</span>
           </span>
         </button>
-        <button type="button" className="hub-card soon" disabled>
+        <button type="button" className="hub-card jumbled" onClick={onJumbled}>
           <span className="hub-icon" aria-hidden="true">
-            ✨
+            🔤
           </span>
           <span>
-            <span className="hub-title">Coming soon</span>
-            <span className="hub-blurb">More games later</span>
+            <span className="hub-title">Jumbled Words</span>
+            <span className="hub-blurb">Unscramble the letters!</span>
           </span>
         </button>
       </div>

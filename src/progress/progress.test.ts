@@ -10,6 +10,7 @@ import {
   isLabComplete,
   isLaptopUnlocked,
   loadProgress,
+  recordJumbledRound,
   recordTypedWord,
   saveProgress,
 } from './progress'
@@ -78,9 +79,37 @@ describe('progress', () => {
         completedLevelIds: [],
         wordsTypedCount: 0,
       },
+      jumbled: { completedDifficulties: [], bestStars: {} },
     })
     const p = loadProgress()
     expect(p.words.unlockedLevelIds).toContain('animals')
+  })
+
+  it('migrates progress missing jumbled bucket', () => {
+    localStorage.setItem(
+      'cla-progress',
+      JSON.stringify({
+        lab: { completed: ['monitor'] },
+        words: {
+          unlockedLevelIds: ['animals'],
+          completedLevelIds: [],
+          wordsTypedCount: 2,
+        },
+      }),
+    )
+    const p = loadProgress()
+    expect(p.lab.completed).toEqual(['monitor'])
+    expect(p.jumbled.completedDifficulties).toEqual([])
+    expect(p.jumbled.bestStars).toEqual({})
+  })
+
+  it('records best jumbled stars without lowering a higher score', () => {
+    let jumbled = loadProgress().jumbled
+    jumbled = recordJumbledRound(jumbled, 'easy', 2)
+    jumbled = recordJumbledRound(jumbled, 'easy', 3)
+    jumbled = recordJumbledRound(jumbled, 'easy', 1)
+    expect(jumbled.completedDifficulties).toContain('easy')
+    expect(jumbled.bestStars.easy).toBe(3)
   })
 
   it('word level order matches content module', () => {

@@ -5,9 +5,13 @@ import {
   completeStation,
   emptyProgress,
   loadProgress,
+  recordJumbledRound,
   saveProgress,
 } from './progress/progress'
 import { Celebration } from './screens/Celebration'
+import { JumbledDifficulty } from './screens/JumbledDifficulty'
+import { JumbledPlay } from './screens/JumbledPlay'
+import { JumbledResults } from './screens/JumbledResults'
 import { LabMap } from './screens/LabMap'
 import { LaptopBonus } from './screens/LaptopBonus'
 import { StationScene } from './screens/StationScene'
@@ -30,6 +34,7 @@ export default function App() {
       <Welcome
         onLab={() => setScreen({ name: 'map' })}
         onWords={() => setScreen({ name: 'words-map' })}
+        onJumbled={() => setScreen({ name: 'jumbled-difficulty' })}
       />
     )
   }
@@ -98,6 +103,50 @@ export default function App() {
       <WordsLevelClear
         levelId={screen.levelId}
         onMap={() => setScreen({ name: 'words-map' })}
+        onHub={() => setScreen({ name: 'welcome' })}
+      />
+    )
+  }
+
+  if (screen.name === 'jumbled-difficulty') {
+    return (
+      <JumbledDifficulty
+        jumbled={progress.jumbled}
+        onBack={() => setScreen({ name: 'welcome' })}
+        onPick={(difficulty) => setScreen({ name: 'jumbled-play', difficulty })}
+      />
+    )
+  }
+
+  if (screen.name === 'jumbled-play') {
+    return (
+      <JumbledPlay
+        difficulty={screen.difficulty}
+        onBack={() => setScreen({ name: 'jumbled-difficulty' })}
+        onRoundComplete={(stars) => {
+          setProgress((p) => ({
+            ...p,
+            jumbled: recordJumbledRound(p.jumbled, screen.difficulty, stars),
+          }))
+          setScreen({
+            name: 'jumbled-results',
+            difficulty: screen.difficulty,
+            stars,
+          })
+        }}
+      />
+    )
+  }
+
+  if (screen.name === 'jumbled-results') {
+    return (
+      <JumbledResults
+        difficulty={screen.difficulty}
+        stars={screen.stars}
+        onReplay={() =>
+          setScreen({ name: 'jumbled-play', difficulty: screen.difficulty })
+        }
+        onDifficulty={() => setScreen({ name: 'jumbled-difficulty' })}
         onHub={() => setScreen({ name: 'welcome' })}
       />
     )
