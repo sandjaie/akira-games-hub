@@ -1,21 +1,42 @@
-type Props = { onStart: () => void }
+import { Rainbow } from '../components/Rainbow'
+import { EXPLORER_NAME } from '../content/explorer'
 
-export function Welcome({ onStart }: Props) {
+type Props = { onLab: () => void; onWords: () => void }
+
+export function Welcome({ onLab, onWords }: Props) {
   return (
-    <main className="screen welcome">
-      <p className="eyebrow">School computer lab</p>
-      <h1 className="display">Computer Lab Adventure</h1>
-      <div className="hero-pc" aria-hidden="true">
-        <div className="hero-monitor" />
-        <div className="hero-stand" />
-        <div className="hero-base" />
-        <div className="hero-tower" />
-      </div>
-      <p>You are the explorer!</p>
-      <p>Find the parts of the computer.</p>
-      <div className="actions">
-        <button type="button" onClick={onStart}>
-          Let&apos;s go!
+    <main className="screen welcome hub">
+      <Rainbow size="small" />
+      <p className="eyebrow">{EXPLORER_NAME}&apos;s games</p>
+      <h1 className="display">Welcome {EXPLORER_NAME}!</h1>
+      <p className="subtitle">Pick a game</p>
+      <div className="hub-cards">
+        <button type="button" className="hub-card lab" onClick={onLab}>
+          <span className="hub-icon" aria-hidden="true">
+            🖥️
+          </span>
+          <span>
+            <span className="hub-title">Parts of the computer</span>
+            <span className="hub-blurb">Find the parts!</span>
+          </span>
+        </button>
+        <button type="button" className="hub-card words" onClick={onWords}>
+          <span className="hub-icon" aria-hidden="true">
+            🌈
+          </span>
+          <span>
+            <span className="hub-title">Fun with Words</span>
+            <span className="hub-blurb">Type fun words!</span>
+          </span>
+        </button>
+        <button type="button" className="hub-card soon" disabled>
+          <span className="hub-icon" aria-hidden="true">
+            ✨
+          </span>
+          <span>
+            <span className="hub-title">Coming soon</span>
+            <span className="hub-blurb">More games later</span>
+          </span>
         </button>
       </div>
     </main>

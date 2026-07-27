@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { EXPLORER_NAME } from '../content/explorer'
 
 type Pair = { id: string; label: string; spot: string }
 
@@ -48,7 +49,7 @@ export function LaptopBonus({ onBack, onComplete }: Props) {
       </div>
       <section className="station-panel">
         <h1 className="display">Laptop peek</h1>
-        <p>A laptop has the same friends inside!</p>
+        <p>{EXPLORER_NAME}, a laptop has the same friends inside!</p>
         <p>Match each part to its cozy spot.</p>
         <div className="laptop-board">
           <div className="match-labels">

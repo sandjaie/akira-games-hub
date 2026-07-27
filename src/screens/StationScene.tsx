@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { EXPLORER_NAME } from '../content/explorer'
 import { STATIONS } from '../content/stations'
 import { gameRegistry } from '../games/gameRegistry'
 import type { LabStationId } from '../types'
@@ -62,7 +63,7 @@ export function StationScene({
 
       {phase === 'reward' ? (
         <section className="reward">
-          <h2 className="display">You found it!</h2>
+          <h2 className="display">You found it, {EXPLORER_NAME}!</h2>
           <p>Nice exploring.</p>
           <div className="actions">
             <button type="button" onClick={onBack}>
