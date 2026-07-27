@@ -7,9 +7,15 @@ export const config = {
   matcher: '/:path*',
 }
 
+function env(name: string): string | undefined {
+  // Vercel injects these at the edge; typed lightly to avoid Node types in middleware.
+  return (globalThis as { process?: { env?: Record<string, string | undefined> } })
+    .process?.env?.[name]
+}
+
 export default function middleware(request: Request): Response | undefined {
-  const user = process.env.SITE_USER
-  const pass = process.env.SITE_PASSWORD
+  const user = env('SITE_USER')
+  const pass = env('SITE_PASSWORD')
 
   if (!user || !pass) {
     return undefined
