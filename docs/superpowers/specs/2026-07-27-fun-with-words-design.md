@@ -40,18 +40,21 @@ No accounts, no online backend. Progress stays in `localStorage`. Parent still r
 - Greeting: **Welcome Akira!**
 - Large colorful game cards:
   - **Parts of the computer** → existing map / stations / laptop / celebration
-  - **Fun with Words** → words level map
+  - **Fun with Words** → words level map (card can show a little rainbow accent)
   - **Coming soon** → disabled/soft-locked card(s)
 - Each card: friendly icon/illustration, one short kid line, large tap target
 - Hub uses a more colorful treatment; the lab map keeps its current look
+- Optional soft rainbow flourish at the very top of the hub (subtle, so it doesn’t fight the cards)
 
 ### 3.2 Fun with Words
 
-1. **Level map** — themed cards (Animals, Colors, School, Home, Play). Locked / unlocked / done (star).
-2. **Typing round** — one large word on screen. Correct letters fill green. Wrong key: soft coral flash, cursor does not advance. **Backspace** removes the last accepted letter.
-3. **Word cheer** — short success beat, then next word in the level.
-4. **Level clear** — after all words in the level (5–8), unlock next theme + stronger cheer.
+1. **Level map** — themed cards (Animals, Colors, School, Home, Play). Locked / unlocked / done (star). A friendly **rainbow arc across the top** of Words screens (level map + play) brands the mode.
+2. **Typing round** — a **rainbow spans the top** of the play screen. The next word **floats/falls down from the rainbow** into a large typing spot (one word at a time — not a rain of many words). After it lands (or while gently settling), she types it. Correct letters fill green. Wrong key: soft coral flash, cursor does not advance. **Backspace** removes the last accepted letter.
+3. **Word cheer** — short success beat (word may sparkle / hop), then the next word drops from the rainbow.
+4. **Level clear** — after all words in the level (5–8), unlock next theme + stronger cheer under the rainbow.
 5. **Navigation** — clear **Games** control back to the hub from Words screens.
+
+**Falling rule (explicit):** Motion is a short, calm drop from the rainbow into place — readable the whole time, not a fast falling-word shooter. Only one active word per round.
 
 ### 3.3 Lab adventure
 
@@ -113,8 +116,10 @@ Refresh must not wipe lab stars or words unlocks.
 - **Palette:** sky blue, sunny yellow, coral cheers, leafy green for correct letters, soft lavender panels — high contrast for readability.
 - **Type:** Fredoka titles, Nunito body; typing word extra large with clear letter spacing.
 - **Hub cards:** distinct color stripe per game, soft shadow, short bounce on press.
+- **Rainbow:** Soft multi-color arc across the **top** of Fun with Words screens (and optionally a smaller rainbow accent on the hub’s Fun with Words card). Not neon-strobing — gentle candy stripes.
+- **Word drop:** Word starts near the rainbow and eases down into the typing area (~0.6–1s), then stays put for typing. Large, high-contrast letters remain readable during the fall.
 - **Typing feedback:** current letter gently emphasized; success = green fill + light sparkle; mistake = quick coral shake (not harsh red).
-- **Motion budget:** card bounce, letter pop, level-clear confetti-style burst — calm, not strobing.
+- **Motion budget:** rainbow-present word drop, card bounce, letter pop, level-clear confetti-style burst — calm, not strobing.
 - Lab screens: no full redesign; only hub + Fun with Words get the brighter treatment.
 
 ---
@@ -142,6 +147,7 @@ Same repo / same Vite entry.
 - She finishes Animals on the physical keyboard (wrong keys don’t advance; Backspace works).
 - Colors unlocks; refresh keeps her unlocks and lab stars.
 - Hub and Words screens feel clearly more colorful and kid-friendly than a plain form UI.
+- Words play screen shows a top rainbow; each new word visibly drops from it before typing.
 - Future games can be added as another hub card without restructuring the lab.
 
 ---
