@@ -1,3 +1,5 @@
+import { fetchThemeWordList, type ThemeQuery } from './wordApi'
+
 export type WordLevelId =
   | 'animals'
   | 'colors'
@@ -9,12 +11,17 @@ export type WordLevelId =
   | 'family'
   | 'body'
   | 'weather'
+  | 'transport'
+  | 'feelings'
 
 export type WordLevel = {
   id: WordLevelId
   title: string
   emoji: string
-  words: string[]
+  /** Datamuse query used for live words */
+  query: ThemeQuery
+  /** Offline / API-failure fallback (kid-curated) */
+  fallbackWords: string[]
 }
 
 export const WORD_LEVEL_ORDER: WordLevelId[] = [
@@ -28,14 +35,19 @@ export const WORD_LEVEL_ORDER: WordLevelId[] = [
   'family',
   'body',
   'weather',
+  'transport',
+  'feelings',
 ]
+
+export const WORDS_PER_ROUND = 10
 
 export const WORD_LEVELS: Record<WordLevelId, WordLevel> = {
   animals: {
     id: 'animals',
     title: 'Animals',
     emoji: '🐾',
-    words: [
+    query: { ml: 'animal', topics: 'pet zoo farm' },
+    fallbackWords: [
       'CAT',
       'DOG',
       'BIRD',
@@ -48,13 +60,22 @@ export const WORD_LEVELS: Record<WordLevelId, WordLevel> = {
       'COW',
       'HEN',
       'ANT',
+      'FOX',
+      'OWL',
+      'BEE',
+      'GOAT',
+      'LAMB',
+      'WOLF',
+      'DEER',
+      'CRAB',
     ],
   },
   colors: {
     id: 'colors',
     title: 'Colors',
     emoji: '🎨',
-    words: [
+    query: { ml: 'color', topics: 'paint crayon' },
+    fallbackWords: [
       'RED',
       'BLUE',
       'PINK',
@@ -65,13 +86,22 @@ export const WORD_LEVELS: Record<WordLevelId, WordLevel> = {
       'BROWN',
       'GRAY',
       'TEAL',
+      'TAN',
+      'NAVY',
+      'LIME',
+      'ROSE',
+      'JADE',
+      'PLUM',
+      'CYAN',
+      'OLIVE',
     ],
   },
   school: {
     id: 'school',
     title: 'School',
     emoji: '📚',
-    words: [
+    query: { ml: 'school', topics: 'classroom teacher' },
+    fallbackWords: [
       'BOOK',
       'PEN',
       'DESK',
@@ -83,13 +113,23 @@ export const WORD_LEVELS: Record<WordLevelId, WordLevel> = {
       'BELL',
       'NOTE',
       'CLASS',
+      'INK',
+      'PAPER',
+      'RULER',
+      'CHALK',
+      'PAGE',
+      'TEST',
+      'WRITE',
+      'SPELL',
+      'LEARN',
     ],
   },
   home: {
     id: 'home',
     title: 'Home',
     emoji: '🏠',
-    words: [
+    query: { ml: 'house', topics: 'home kitchen bedroom' },
+    fallbackWords: [
       'BED',
       'DOOR',
       'CUP',
@@ -101,13 +141,23 @@ export const WORD_LEVELS: Record<WordLevelId, WordLevel> = {
       'OVEN',
       'RUG',
       'CHAIR',
+      'GATE',
+      'ROOF',
+      'FLOOR',
+      'SHELF',
+      'TOWEL',
+      'SOAP',
+      'CLOCK',
+      'KEY',
+      'TABLE',
     ],
   },
   play: {
     id: 'play',
     title: 'Play',
     emoji: '🎮',
-    words: [
+    query: { ml: 'play', topics: 'game toy fun kids' },
+    fallbackWords: [
       'BALL',
       'GAME',
       'JUMP',
@@ -119,13 +169,23 @@ export const WORD_LEVELS: Record<WordLevelId, WordLevel> = {
       'RACE',
       'DANCE',
       'HIDE',
+      'RUN',
+      'SKIP',
+      'KICK',
+      'THROW',
+      'CATCH',
+      'CLAP',
+      'LAUGH',
+      'SMILE',
+      'FUN',
     ],
   },
   food: {
     id: 'food',
     title: 'Food',
     emoji: '🍎',
-    words: [
+    query: { ml: 'food', topics: 'fruit snack meal' },
+    fallbackWords: [
       'APPLE',
       'MILK',
       'BREAD',
@@ -137,13 +197,23 @@ export const WORD_LEVELS: Record<WordLevelId, WordLevel> = {
       'PEAR',
       'JUICE',
       'PASTA',
+      'BEAN',
+      'NUT',
+      'HAM',
+      'PIE',
+      'JAM',
+      'TEA',
+      'ROLL',
+      'CHIP',
+      'BERRY',
     ],
   },
   nature: {
     id: 'nature',
     title: 'Nature',
     emoji: '🌳',
-    words: [
+    query: { ml: 'nature', topics: 'tree outdoor garden' },
+    fallbackWords: [
       'TREE',
       'LEAF',
       'SUN',
@@ -155,13 +225,23 @@ export const WORD_LEVELS: Record<WordLevelId, WordLevel> = {
       'SEED',
       'CLOUD',
       'GRASS',
+      'SAND',
+      'WAVE',
+      'POND',
+      'DIRT',
+      'MUD',
+      'NEST',
+      'TWIG',
+      'BLOOM',
+      'STONE',
     ],
   },
   family: {
     id: 'family',
     title: 'Family',
     emoji: '👨‍👩‍👧',
-    words: [
+    query: { ml: 'family', topics: 'parent child love' },
+    fallbackWords: [
       'MOM',
       'DAD',
       'BABY',
@@ -172,13 +252,22 @@ export const WORD_LEVELS: Record<WordLevelId, WordLevel> = {
       'HUG',
       'KISS',
       'HOME',
+      'BROTHER',
+      'NANA',
+      'PAPA',
+      'CHILD',
+      'KID',
+      'FAMILY',
+      'CARE',
+      'KIND',
     ],
   },
   body: {
     id: 'body',
     title: 'Body',
     emoji: '💪',
-    words: [
+    query: { ml: 'body', topics: 'face hand foot' },
+    fallbackWords: [
       'HAND',
       'FOOT',
       'EYE',
@@ -190,13 +279,23 @@ export const WORD_LEVELS: Record<WordLevelId, WordLevel> = {
       'FACE',
       'TOOTH',
       'NECK',
+      'KNEE',
+      'TOE',
+      'LIP',
+      'CHIN',
+      'BACK',
+      'HEAD',
+      'SKIN',
+      'BONE',
+      'HEART',
     ],
   },
   weather: {
     id: 'weather',
     title: 'Weather',
     emoji: '⛅',
-    words: [
+    query: { ml: 'weather', topics: 'rain sun sky' },
+    fallbackWords: [
       'RAIN',
       'SNOW',
       'WIND',
@@ -207,10 +306,81 @@ export const WORD_LEVELS: Record<WordLevelId, WordLevel> = {
       'FOG',
       'HAIL',
       'SKY',
+      'SUNNY',
+      'CLOUDY',
+      'ICY',
+      'WET',
+      'DRY',
+      'COOL',
+      'BREEZE',
+      'THUNDER',
+    ],
+  },
+  transport: {
+    id: 'transport',
+    title: 'Transport',
+    emoji: '🚗',
+    query: { ml: 'vehicle', topics: 'car train boat' },
+    fallbackWords: [
+      'CAR',
+      'BUS',
+      'BIKE',
+      'TRAIN',
+      'BOAT',
+      'SHIP',
+      'PLANE',
+      'TRUCK',
+      'VAN',
+      'TAXI',
+      'JET',
+      'CART',
+      'RAIL',
+      'ROAD',
+      'WHEEL',
+      'RIDE',
+      'PARK',
+      'STOP',
+    ],
+  },
+  feelings: {
+    id: 'feelings',
+    title: 'Feelings',
+    emoji: '😊',
+    query: { ml: 'emotion', topics: 'happy sad kind' },
+    fallbackWords: [
+      'HAPPY',
+      'SAD',
+      'MAD',
+      'GLAD',
+      'BRAVE',
+      'CALM',
+      'PROUD',
+      'SHY',
+      'KIND',
+      'NICE',
+      'FUNNY',
+      'SILLY',
+      'TIRED',
+      'HUNGRY',
+      'LOVED',
+      'SAFE',
+      'HOPE',
+      'JOY',
     ],
   },
 }
 
 export function getWordLevel(id: WordLevelId): WordLevel {
   return WORD_LEVELS[id]
+}
+
+/** Live themed words for one Fun with Words round (fresh each play). */
+export async function loadLevelWords(id: WordLevelId): Promise<string[]> {
+  const level = WORD_LEVELS[id]
+  return fetchThemeWordList(
+    level.query,
+    { min: 3, max: 6 },
+    WORDS_PER_ROUND,
+    level.fallbackWords,
+  )
 }

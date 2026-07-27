@@ -1,6 +1,10 @@
 import { useEffect, useRef, useState } from 'react'
 import { Rainbow } from '../components/Rainbow'
-import { getWordLevel, type WordLevelId } from '../content/wordLevels'
+import {
+  getWordLevel,
+  loadLevelWords,
+  type WordLevelId,
+} from '../content/wordLevels'
 import {
   completeWordLevel,
   recordTypedWord,
@@ -35,26 +39,43 @@ export function WordsPlay({
   onLevelComplete,
 }: Props) {
   const level = getWordLevel(levelId)
+  const [roundWords, setRoundWords] = useState<string[] | null>(null)
   const [wordIndex, setWordIndex] = useState(0)
-  const [typing, setTyping] = useState<TypingState>(() =>
-    createTypingState(level.words[0]),
-  )
+  const [typing, setTyping] = useState<TypingState | null>(null)
   const [dropKey, setDropKey] = useState(0)
   const [wordDone, setWordDone] = useState(false)
   const wordsRef = useRef(words)
   wordsRef.current = words
 
+  useEffect(() => {
+    let cancelled = false
+    setRoundWords(null)
+    setTyping(null)
+    setWordIndex(0)
+    setWordDone(false)
+    void loadLevelWords(levelId).then((list) => {
+      if (cancelled || list.length === 0) return
+      setRoundWords(list)
+      setTyping(createTypingState(list[0]))
+      setDropKey((k) => k + 1)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [levelId])
+
   function pressKey(key: string) {
-    if (wordDone) return
-    setTyping((s) => reduceTyping(s, { type: 'KEY', key }))
+    if (!typing || wordDone) return
+    setTyping((s) => (s ? reduceTyping(s, { type: 'KEY', key }) : s))
   }
 
   function pressBackspace() {
-    if (wordDone) return
-    setTyping((s) => reduceTyping(s, { type: 'BACKSPACE' }))
+    if (!typing || wordDone) return
+    setTyping((s) => (s ? reduceTyping(s, { type: 'BACKSPACE' }) : s))
   }
 
   function advance(countWord: boolean) {
+    if (!roundWords || !typing) return
     let nextWords = wordsRef.current
     if (countWord) {
       nextWords = recordTypedWord(nextWords)
@@ -62,68 +83,88 @@ export function WordsPlay({
     }
 
     const nextIndex = wordIndex + 1
-    if (nextIndex >= level.words.length) {
+    if (nextIndex >= roundWords.length) {
       onWordsChange(completeWordLevel(nextWords, levelId))
       onLevelComplete()
       return
     }
     setWordIndex(nextIndex)
-    setTyping(createTypingState(level.words[nextIndex]))
+    setTyping(createTypingState(roundWords[nextIndex]))
     setDropKey((k) => k + 1)
     setWordDone(false)
   }
 
   function pressDone() {
+    if (!typing) return
     if (!isWordComplete(typing) && !wordDone) return
     advance(true)
   }
 
   function pressNext() {
+    if (!typing) return
     advance(wordDone || isWordComplete(typing))
   }
 
   useEffect(() => {
-    if (!typing.wrong) return
+    if (!typing?.wrong) return
     const id = window.setTimeout(() => {
-      setTyping((s) => reduceTyping(s, { type: 'CLEAR_WRONG' }))
+      setTyping((s) => (s ? reduceTyping(s, { type: 'CLEAR_WRONG' }) : s))
     }, 350)
     return () => window.clearTimeout(id)
-  }, [typing.wrong])
+  }, [typing?.wrong])
 
   useEffect(() => {
-    if (!isWordComplete(typing) || wordDone) return
+    if (!typing || !isWordComplete(typing) || wordDone) return
     setWordDone(true)
   }, [typing, wordDone])
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
+      if (!typing) return
       if (e.key === 'Enter') {
         e.preventDefault()
-        if (wordDone || isWordComplete(typing)) {
-          advance(true)
-        }
+        if (wordDone || isWordComplete(typing)) advance(true)
         return
       }
       if (wordDone) return
       if (e.key === 'Backspace') {
         e.preventDefault()
-        setTyping((s) => reduceTyping(s, { type: 'BACKSPACE' }))
+        setTyping((s) => (s ? reduceTyping(s, { type: 'BACKSPACE' }) : s))
         return
       }
       if (e.key.length === 1 && /[a-z]/i.test(e.key)) {
         e.preventDefault()
-        setTyping((s) => reduceTyping(s, { type: 'KEY', key: e.key }))
+        setTyping((s) => (s ? reduceTyping(s, { type: 'KEY', key: e.key }) : s))
       }
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
   })
 
+  if (!roundWords || !typing) {
+    return (
+      <main className="screen words-play">
+        <div className="words-top-row">
+          <button type="button" className="secondary" onClick={onBack}>
+            ← Themes
+          </button>
+          <p className="eyebrow">
+            {level.emoji} {level.title}
+          </p>
+          <span className="words-top-spacer" />
+        </div>
+        <p className="hint" role="status">
+          Finding new words…
+        </p>
+      </main>
+    )
+  }
+
   const done = typing.word.slice(0, typing.index)
   const current = typing.word[typing.index] ?? ''
   const todo = typing.word.slice(typing.index + 1)
   const canDone = wordDone || isWordComplete(typing)
-  const isLast = wordIndex >= level.words.length - 1
+  const isLast = wordIndex >= roundWords.length - 1
 
   return (
     <main className="screen words-play">
@@ -158,7 +199,7 @@ export function WordsPlay({
             : 'Tap the letters — or Next to skip'}
         </p>
         <p className="word-progress-count">
-          Word {wordIndex + 1} of {level.words.length}
+          Word {wordIndex + 1} of {roundWords.length}
         </p>
         <div className="words-keyboard" aria-label="Letter keys">
           {LETTER_ROWS.map((row) => (

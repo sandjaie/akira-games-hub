@@ -50,7 +50,11 @@ Example: `http://192.168.1.20:5173`
 
 Progress (lab stars, word level unlocks, and jumbled best stars) is saved in the browser only — no database.
 
-UI mockup reference: `docs/superpowers/mockups/fun-with-words-mockup.html`
+## Word sources
+
+Fun with Words and Jumbled Words fetch **fresh kid-filtered words** from the free [Datamuse API](https://www.datamuse.com/api/) each time a round starts (so lists change between plays). Words are filtered to short A–Z spellings and a small blocklist. If the network fails, curated offline fallback lists are used.
+
+Recently seen words are remembered for the browser tab session so the next round prefers new ones.
 
 ## Deploy on Vercel (anytime play + password)
 

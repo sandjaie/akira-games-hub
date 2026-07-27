@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
-  pickRound,
+  loadJumbledRound,
   type JumbledDifficulty,
   type JumbledEntry,
 } from '../content/jumbledWords'
@@ -26,31 +26,63 @@ function buildPuzzle(entry: JumbledEntry) {
   const base = tilesFromWord(entry.word)
   const scrambled = scrambleTiles(base)
   return {
-    entry,
     pool: scrambled,
     slots: emptySlots(entry.word.length),
-    firstLetterHint: false,
   }
 }
 
 export function JumbledPlay({ difficulty, onBack, onRoundComplete }: Props) {
-  const round = useMemo(() => pickRound(difficulty), [difficulty])
+  const [round, setRound] = useState<JumbledEntry[] | null>(null)
   const [index, setIndex] = useState(0)
-  const [pool, setPool] = useState<LetterTile[]>(() =>
-    scrambleTiles(tilesFromWord(round[0].word)),
-  )
-  const [slots, setSlots] = useState<Array<LetterTile | null>>(() =>
-    emptySlots(round[0].word.length),
-  )
+  const [pool, setPool] = useState<LetterTile[]>([])
+  const [slots, setSlots] = useState<Array<LetterTile | null>>([])
   const [firstLetterHint, setFirstLetterHint] = useState(false)
   const [feedback, setFeedback] = useState<Feedback>('idle')
   const [hintsUsed, setHintsUsed] = useState(0)
+
+  useEffect(() => {
+    let cancelled = false
+    setRound(null)
+    setHintsUsed(0)
+    void loadJumbledRound(difficulty).then((entries) => {
+      if (cancelled || entries.length === 0) return
+      const puzzle = buildPuzzle(entries[0])
+      setRound(entries)
+      setIndex(0)
+      setPool(puzzle.pool)
+      setSlots(puzzle.slots)
+      setFirstLetterHint(false)
+      setFeedback('idle')
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [difficulty])
+
+  if (!round) {
+    return (
+      <main className="screen jumbled-play">
+        <div className="words-top-row">
+          <button type="button" className="secondary" onClick={onBack}>
+            ← Levels
+          </button>
+          <p className="eyebrow">
+            {difficulty === 'easy' ? 'Easy' : 'Medium'}
+          </p>
+          <span className="words-top-spacer" />
+        </div>
+        <p className="hint" role="status">
+          Finding new jumbled words…
+        </p>
+      </main>
+    )
+  }
 
   const entry = round[index]
   const word = entry.word
 
   function loadEntry(nextIndex: number) {
-    const puzzle = buildPuzzle(round[nextIndex])
+    const puzzle = buildPuzzle(round![nextIndex])
     setIndex(nextIndex)
     setPool(puzzle.pool)
     setSlots(puzzle.slots)
@@ -112,6 +144,7 @@ export function JumbledPlay({ difficulty, onBack, onRoundComplete }: Props) {
   }
 
   function checkOrAdvance() {
+    if (!round) return
     if (feedback === 'correct') {
       if (index + 1 >= round.length) {
         onRoundComplete(starsFromHints(hintsUsed))
@@ -167,14 +200,14 @@ export function JumbledPlay({ difficulty, onBack, onRoundComplete }: Props) {
 
   const clue =
     difficulty === 'easy' ? (
-      <p className="jumbled-clue" aria-label={`Picture clue ${entry.emoji}`}>
+      <p className="jumbled-clue" aria-label={`Picture clue ${entry.emoji ?? ''}`}>
         <span className="jumbled-emoji" aria-hidden="true">
-          {entry.emoji}
+          {entry.emoji ?? '🔤'}
         </span>
       </p>
     ) : (
       <p className="jumbled-clue">
-        Category: <strong>{entry.category}</strong>
+        Category: <strong>{entry.category ?? 'Word'}</strong>
       </p>
     )
 
