@@ -850,13 +850,17 @@
   flex-wrap: nowrap;
   justify-content: center;
   gap: 0.3rem;
+  width: 100%;
+  max-width: 520px;
+  margin-inline: auto;
 }
 
 .words-key {
-  flex: 0 1 auto;
-  min-width: clamp(28px, 8.2vw, 48px);
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: 48px;
   min-height: var(--tap-min);
-  padding: 0.35rem 0.2rem;
+  padding: 0.35rem 0.15rem;
   border-radius: 12px;
   border: 3px solid rgba(28, 42, 58, 0.1);
   background: #fff7d6;
@@ -873,27 +877,25 @@
   box-shadow: none;
 }
 
-.words-key-wide {
-  min-width: min(220px, 70vw);
-  background: #ffe0d6;
-}
-
 .words-key-backspace {
-  min-width: clamp(40px, 12vw, 64px);
+  flex: 1.5 1 0;
+  max-width: 72px;
   background: #ffe0d6;
   border-color: #e86f5c;
-  flex: 1.4 1 auto;
+  font-size: clamp(1rem, 3.6vw, 1.3rem);
 }
 
 .words-key-actions {
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   margin-top: 0.35rem;
   gap: 0.45rem;
+  max-width: 520px;
 }
 
 .words-key-action {
-  flex: 1 1 40%;
-  min-width: min(140px, 40vw);
+  flex: 1 1 0;
+  min-width: 0;
+  max-width: none;
   padding: 0.55rem 0.4rem;
   font-size: clamp(0.85rem, 3vw, 1.05rem);
 }
@@ -926,15 +928,19 @@
 
 @media (max-width: 480px) {
   .words-key-row {
-    gap: 0.22rem;
+    gap: 0.2rem;
   }
 
   .words-key {
-    min-width: 0;
-    flex: 1 1 0;
+    max-width: none;
     padding: 0.4rem 0;
     border-width: 2px;
     border-radius: 10px;
+  }
+
+  .words-key-backspace {
+    flex: 1.35 1 0;
+    max-width: none;
   }
 
   .play-stage {
