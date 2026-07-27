@@ -1,0 +1,143 @@
+:root {
+  --ink: #1c2a3a;
+  --paper: #f7f3e8;
+  --sky: #7ec8e3;
+  --sky-deep: #3a8fb7;
+  --desk: #c4a574;
+  --desk-dark: #8b6b3d;
+  --leaf: #5f9e6e;
+  --sun: #f0c43a;
+  --coral: #e86f5c;
+  --tower: #5a6b7d;
+  --white: #fffdf8;
+  --locked: #9aa6b2;
+  --tap-min: 48px;
+  --radius: 20px;
+  --shadow: 0 8px 24px rgba(28, 42, 58, 0.12);
+  font-family: Nunito, system-ui, sans-serif;
+  color: var(--ink);
+  background: var(--paper);
+  line-height: 1.35;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  min-height: 100dvh;
+  background:
+    radial-gradient(ellipse 120% 80% at 10% -10%, #bfe6f5 0%, transparent 55%),
+    radial-gradient(ellipse 90% 70% at 100% 0%, #ffe9a8 0%, transparent 50%),
+    linear-gradient(180deg, #eaf6fb 0%, var(--paper) 55%, #efe6d4 100%);
+}
+
+h1,
+h2,
+.display {
+  font-family: Fredoka, Nunito, sans-serif;
+  font-weight: 600;
+  margin: 0;
+}
+
+p {
+  margin: 0.35rem 0;
+}
+
+button {
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  min-height: var(--tap-min);
+  min-width: var(--tap-min);
+  border: 3px solid transparent;
+  border-radius: 999px;
+  padding: 0.75rem 1.5rem;
+  background: var(--sky-deep);
+  color: white;
+  box-shadow: var(--shadow);
+  touch-action: manipulation;
+}
+
+button:focus-visible {
+  outline: 3px solid var(--sun);
+  outline-offset: 3px;
+}
+
+button:disabled {
+  background: var(--locked);
+  color: #eef2f5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+button.secondary {
+  background: var(--white);
+  color: var(--ink);
+  border-color: var(--sky-deep);
+}
+
+@keyframes star-pop {
+  0% {
+    transform: scale(0.4);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes scene-enter {
+  from {
+    transform: translateY(12px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes cheer {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.06);
+  }
+}
+
+@keyframes glow-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(58, 143, 183, 0.45);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(58, 143, 183, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
