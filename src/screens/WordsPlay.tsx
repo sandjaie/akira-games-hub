@@ -13,7 +13,11 @@ import {
   type TypingState,
 } from '../words/typing'
 
-const LETTER_ROWS = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM'] as const
+const LETTER_ROWS = [
+  { id: 'row1', keys: ['Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P'] },
+  { id: 'row2', keys: ['A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L'] },
+  { id: 'row3', keys: ['Z', 'X', 'C', 'V', 'B', 'N', 'M', '⌫'] },
+] as const
 
 type Props = {
   levelId: WordLevelId
@@ -158,29 +162,34 @@ export function WordsPlay({
         </p>
         <div className="words-keyboard" aria-label="Letter keys">
           {LETTER_ROWS.map((row) => (
-            <div key={row} className="words-key-row">
-              {row.split('').map((letter) => (
-                <button
-                  key={letter}
-                  type="button"
-                  className="words-key"
-                  disabled={wordDone}
-                  onClick={() => pressKey(letter)}
-                >
-                  {letter}
-                </button>
-              ))}
+            <div key={row.id} className="words-key-row">
+              {row.keys.map((key) =>
+                key === '⌫' ? (
+                  <button
+                    key="backspace"
+                    type="button"
+                    className="words-key words-key-backspace"
+                    disabled={wordDone}
+                    onClick={pressBackspace}
+                    aria-label="Backspace"
+                  >
+                    ⌫
+                  </button>
+                ) : (
+                  <button
+                    key={key}
+                    type="button"
+                    className="words-key"
+                    disabled={wordDone}
+                    onClick={() => pressKey(key)}
+                  >
+                    {key}
+                  </button>
+                ),
+              )}
             </div>
           ))}
           <div className="words-key-row words-key-actions">
-            <button
-              type="button"
-              className="words-key words-key-action"
-              disabled={wordDone}
-              onClick={pressBackspace}
-            >
-              ⌫ Backspace
-            </button>
             <button
               type="button"
               className="words-key words-key-action words-key-next"

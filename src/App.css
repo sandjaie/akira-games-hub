@@ -878,6 +878,13 @@
   background: #ffe0d6;
 }
 
+.words-key-backspace {
+  min-width: clamp(40px, 12vw, 64px);
+  background: #ffe0d6;
+  border-color: #e86f5c;
+  flex: 1.4 1 auto;
+}
+
 .words-key-actions {
   flex-wrap: wrap;
   margin-top: 0.35rem;
@@ -885,8 +892,8 @@
 }
 
 .words-key-action {
-  flex: 1 1 30%;
-  min-width: min(110px, 28vw);
+  flex: 1 1 40%;
+  min-width: min(140px, 40vw);
   padding: 0.55rem 0.4rem;
   font-size: clamp(0.85rem, 3vw, 1.05rem);
 }
