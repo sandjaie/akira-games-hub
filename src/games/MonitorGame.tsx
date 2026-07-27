@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { playSfx } from '../audio/sounds'
 import type { MiniGameProps } from './types'
 
 const CHOICES = [
@@ -20,8 +21,13 @@ export function MonitorGame({ onComplete }: MiniGameProps) {
             type="button"
             className="game-choice"
             onClick={() => {
-              if (choice.correct) onComplete()
-              else setHint('Try again!')
+              if (choice.correct) {
+                playSfx('correct')
+                onComplete()
+              } else {
+                playSfx('wrong')
+                setHint('Try again!')
+              }
             }}
           >
             {choice.label}

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { playSfx } from '../audio/sounds'
 import type { MiniGameProps } from './types'
 
 type Card = { id: number; face: string; pair: string }
@@ -17,6 +18,7 @@ export function CpuGame({ onComplete }: MiniGameProps) {
 
   const onCard = (card: Card) => {
     if (lock || matched.includes(card.pair) || flipped.includes(card.id)) return
+    playSfx('tap')
     const next = [...flipped, card.id]
     setFlipped(next)
     if (next.length < 2) return
@@ -28,8 +30,10 @@ export function CpuGame({ onComplete }: MiniGameProps) {
       setMatched(pairs)
       setFlipped([])
       setLock(false)
+      playSfx(pairs.length === 2 ? 'word' : 'correct')
       if (pairs.length === 2) onComplete()
     } else {
+      playSfx('wrong')
       window.setTimeout(() => {
         setFlipped([])
         setLock(false)

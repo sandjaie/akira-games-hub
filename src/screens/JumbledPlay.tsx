@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react'
+import { playSfx, stopBgm } from '../audio/sounds'
+import { SoundToggle } from '../components/SoundToggle'
 import {
   loadJumbledRound,
   type JumbledDifficulty,
@@ -41,6 +43,7 @@ export function JumbledPlay({ difficulty, onBack, onRoundComplete }: Props) {
   const [hintsUsed, setHintsUsed] = useState(0)
 
   useEffect(() => {
+    stopBgm()
     let cancelled = false
     setRound(null)
     setHintsUsed(0)
@@ -53,36 +56,20 @@ export function JumbledPlay({ difficulty, onBack, onRoundComplete }: Props) {
       setSlots(puzzle.slots)
       setFirstLetterHint(false)
       setFeedback('idle')
+      playSfx('whoosh')
     })
     return () => {
       cancelled = true
     }
   }, [difficulty])
 
-  if (!round) {
-    return (
-      <main className="screen jumbled-play">
-        <div className="words-top-row">
-          <button type="button" className="secondary" onClick={onBack}>
-            ← Levels
-          </button>
-          <p className="eyebrow">
-            {difficulty === 'easy' ? 'Easy' : 'Medium'}
-          </p>
-          <span className="words-top-spacer" />
-        </div>
-        <p className="hint" role="status">
-          Finding new jumbled words…
-        </p>
-      </main>
-    )
-  }
-
-  const entry = round[index]
-  const word = entry.word
+  const entry = round?.[index]
+  const word = entry?.word ?? ''
 
   function loadEntry(nextIndex: number) {
-    const puzzle = buildPuzzle(round![nextIndex])
+    const nextEntry = round?.[nextIndex]
+    if (!nextEntry) return
+    const puzzle = buildPuzzle(nextEntry)
     setIndex(nextIndex)
     setPool(puzzle.pool)
     setSlots(puzzle.slots)
@@ -101,10 +88,16 @@ export function JumbledPlay({ difficulty, onBack, onRoundComplete }: Props) {
     setSlots(nextSlots)
 
     if (nextSlots.every((s) => s !== null)) {
-      if (isAnswerCorrect(nextSlots, word)) setFeedback('correct')
-      else setFeedback('wrong')
+      if (isAnswerCorrect(nextSlots, word)) {
+        setFeedback('correct')
+        playSfx('word')
+      } else {
+        setFeedback('wrong')
+        playSfx('wrong')
+      }
     } else {
       setFeedback('idle')
+      playSfx('tap')
     }
   }
 
@@ -119,6 +112,7 @@ export function JumbledPlay({ difficulty, onBack, onRoundComplete }: Props) {
     })
     setPool((p) => [...p, tile])
     setFeedback('idle')
+    playSfx('tap')
   }
 
   function resetPlacement() {
@@ -133,6 +127,7 @@ export function JumbledPlay({ difficulty, onBack, onRoundComplete }: Props) {
   function useHint() {
     if (feedback === 'correct') return
     setHintsUsed((h) => h + 1)
+    playSfx('hint')
     if (difficulty === 'easy') {
       setFirstLetterHint(true)
       return
@@ -146,6 +141,7 @@ export function JumbledPlay({ difficulty, onBack, onRoundComplete }: Props) {
   function checkOrAdvance() {
     if (!round) return
     if (feedback === 'correct') {
+      playSfx('whoosh')
       if (index + 1 >= round.length) {
         onRoundComplete(starsFromHints(hintsUsed))
         return
@@ -157,9 +153,11 @@ export function JumbledPlay({ difficulty, onBack, onRoundComplete }: Props) {
     if (!slots.every((s) => s !== null)) return
     if (isAnswerCorrect(slots, word)) {
       setFeedback('correct')
+      playSfx('word')
       return
     }
     setFeedback('wrong')
+    playSfx('wrong')
   }
 
   useEffect(() => {
@@ -169,6 +167,8 @@ export function JumbledPlay({ difficulty, onBack, onRoundComplete }: Props) {
   }, [feedback])
 
   useEffect(() => {
+    if (!round) return
+
     function onKeyDown(e: KeyboardEvent) {
       if (e.key === 'Backspace') {
         e.preventDefault()
@@ -198,6 +198,26 @@ export function JumbledPlay({ difficulty, onBack, onRoundComplete }: Props) {
     return () => window.removeEventListener('keydown', onKeyDown)
   })
 
+  if (!round || !entry) {
+    return (
+      <main className="screen jumbled-play">
+        <SoundToggle active={false} />
+        <div className="words-top-row">
+          <button type="button" className="secondary" onClick={onBack}>
+            ← Levels
+          </button>
+          <p className="eyebrow">
+            {difficulty === 'easy' ? 'Easy' : 'Medium'}
+          </p>
+          <span className="words-top-spacer" />
+        </div>
+        <p className="hint" role="status">
+          Finding new jumbled words…
+        </p>
+      </main>
+    )
+  }
+
   const clue =
     difficulty === 'easy' ? (
       <p className="jumbled-clue" aria-label={`Picture clue ${entry.emoji ?? ''}`}>
@@ -213,6 +233,7 @@ export function JumbledPlay({ difficulty, onBack, onRoundComplete }: Props) {
 
   return (
     <main className="screen jumbled-play">
+      <SoundToggle active={false} />
       <div className="words-top-row">
         <button type="button" className="secondary" onClick={onBack}>
           ← Levels

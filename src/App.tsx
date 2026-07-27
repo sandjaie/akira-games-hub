@@ -5,10 +5,15 @@ import {
   completeStation,
   emptyProgress,
   loadProgress,
+  recordCountriesRound,
   recordJumbledRound,
   saveProgress,
 } from './progress/progress'
 import { Celebration } from './screens/Celebration'
+import { CountriesDifficulty } from './screens/CountriesDifficulty'
+import { CountriesMode } from './screens/CountriesMode'
+import { CountriesPlay } from './screens/CountriesPlay'
+import { CountriesResults } from './screens/CountriesResults'
 import { JumbledDifficulty } from './screens/JumbledDifficulty'
 import { JumbledPlay } from './screens/JumbledPlay'
 import { JumbledResults } from './screens/JumbledResults'
@@ -35,6 +40,7 @@ export default function App() {
         onLab={() => setScreen({ name: 'map' })}
         onWords={() => setScreen({ name: 'words-map' })}
         onJumbled={() => setScreen({ name: 'jumbled-difficulty' })}
+        onCountries={() => setScreen({ name: 'countries-mode' })}
       />
     )
   }
@@ -147,6 +153,82 @@ export default function App() {
           setScreen({ name: 'jumbled-play', difficulty: screen.difficulty })
         }
         onDifficulty={() => setScreen({ name: 'jumbled-difficulty' })}
+        onHub={() => setScreen({ name: 'welcome' })}
+      />
+    )
+  }
+
+  if (screen.name === 'countries-mode') {
+    return (
+      <CountriesMode
+        onBack={() => setScreen({ name: 'welcome' })}
+        onPick={(mode) => setScreen({ name: 'countries-difficulty', mode })}
+      />
+    )
+  }
+
+  if (screen.name === 'countries-difficulty') {
+    return (
+      <CountriesDifficulty
+        mode={screen.mode}
+        countries={progress.countries}
+        onBack={() => setScreen({ name: 'countries-mode' })}
+        onPick={(difficulty) =>
+          setScreen({
+            name: 'countries-play',
+            mode: screen.mode,
+            difficulty,
+          })
+        }
+      />
+    )
+  }
+
+  if (screen.name === 'countries-play') {
+    return (
+      <CountriesPlay
+        mode={screen.mode}
+        difficulty={screen.difficulty}
+        onBack={() =>
+          setScreen({ name: 'countries-difficulty', mode: screen.mode })
+        }
+        onRoundComplete={(score, stars) => {
+          setProgress((p) => ({
+            ...p,
+            countries: recordCountriesRound(
+              p.countries,
+              screen.mode,
+              screen.difficulty,
+              stars,
+            ),
+          }))
+          setScreen({
+            name: 'countries-results',
+            mode: screen.mode,
+            difficulty: screen.difficulty,
+            score,
+            stars,
+          })
+        }}
+      />
+    )
+  }
+
+  if (screen.name === 'countries-results') {
+    return (
+      <CountriesResults
+        mode={screen.mode}
+        difficulty={screen.difficulty}
+        score={screen.score}
+        stars={screen.stars}
+        onReplay={() =>
+          setScreen({
+            name: 'countries-play',
+            mode: screen.mode,
+            difficulty: screen.difficulty,
+          })
+        }
+        onModes={() => setScreen({ name: 'countries-mode' })}
         onHub={() => setScreen({ name: 'welcome' })}
       />
     )

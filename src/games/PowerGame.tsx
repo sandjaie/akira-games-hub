@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { playSfx } from '../audio/sounds'
 import type { MiniGameProps } from './types'
 
 export function PowerGame({ onComplete }: MiniGameProps) {
@@ -14,6 +15,7 @@ export function PowerGame({ onComplete }: MiniGameProps) {
           className="plug"
           disabled={plugged}
           onClick={() => {
+            playSfx('tap')
             setPlugged(true)
             setHint('Now flip the switch!')
           }}
@@ -25,7 +27,10 @@ export function PowerGame({ onComplete }: MiniGameProps) {
           type="button"
           className="game-choice"
           disabled={!plugged}
-          onClick={() => onComplete()}
+          onClick={() => {
+            playSfx('correct')
+            onComplete()
+          }}
         >
           Flip switch
         </button>

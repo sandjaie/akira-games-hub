@@ -1156,4 +1156,246 @@
   }
 }
 
+.sound-toggle {
+  position: fixed;
+  top: 0.75rem;
+  right: 0.75rem;
+  z-index: 40;
+  width: 48px;
+  height: 48px;
+  min-width: 48px;
+  min-height: 48px;
+  padding: 0;
+  border-radius: 50%;
+  border: 3px solid rgba(28, 42, 58, 0.12);
+  background: var(--white);
+  color: var(--ink);
+  font-size: 1.25rem;
+  box-shadow: var(--shadow);
+  line-height: 1;
+}
 
+.sound-toggle.muted {
+  opacity: 0.7;
+}
+
+.music-hint {
+  text-align: center;
+  font-weight: 800;
+  color: var(--sky-deep);
+  margin: 0 0 0.5rem;
+}
+
+.hub-card.countries {
+  border-color: #6bcb77;
+}
+
+.hub-card.countries .hub-icon {
+  background: #d8f5e0;
+}
+
+.hub-card.countries-flags {
+  border-color: #f0c43a;
+}
+
+.hub-card.countries-flags .hub-icon {
+  background: #fff3c4;
+}
+
+.hub-card.countries-maps {
+  border-color: #74c0fc;
+}
+
+.hub-card.countries-maps .hub-icon {
+  background: #d8f1fb;
+}
+
+.countries-mode-cards {
+  width: min(520px, 100%);
+}
+
+.countries-play {
+  gap: 0.75rem;
+}
+
+.countries-prompt {
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  text-align: center;
+  margin: 0.25rem 0;
+}
+
+.flag-stage {
+  display: flex;
+  justify-content: center;
+  margin: 0.5rem 0;
+}
+
+.flag-hero {
+  width: min(280px, 85vw);
+  height: auto;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  border: 3px solid rgba(28, 42, 58, 0.12);
+}
+
+.countries-choices {
+  display: grid;
+  gap: 0.65rem;
+  width: min(420px, 100%);
+  margin: 0 auto;
+}
+
+.countries-choice {
+  min-height: var(--tap-min);
+  font-size: 1.15rem;
+  font-weight: 800;
+  border-radius: 16px;
+  border: 3px solid rgba(28, 42, 58, 0.12);
+  background: var(--white);
+  color: var(--ink);
+  box-shadow: var(--shadow);
+}
+
+.countries-choice:focus-visible {
+  outline: 3px solid var(--sun);
+  outline-offset: 3px;
+}
+
+.countries-choice.correct {
+  background: #d8f5e0;
+  border-color: #69db7c;
+}
+
+.countries-choice.wrong {
+  background: #ffe3de;
+  border-color: var(--coral);
+}
+
+.countries-reveal {
+  width: min(420px, 100%);
+  margin: 0.5rem auto 0;
+  padding: 1rem 1.1rem;
+  border-radius: 18px;
+  background: var(--white);
+  box-shadow: var(--shadow);
+  text-align: center;
+  display: grid;
+  gap: 0.4rem;
+}
+
+.countries-reveal.ok {
+  border: 3px solid #69db7c;
+}
+
+.countries-reveal.no {
+  border: 3px solid #ffc9c0;
+}
+
+.countries-feedback {
+  font-family: Fredoka, sans-serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.countries-meta {
+  margin: 0;
+  font-weight: 700;
+}
+
+.countries-fact {
+  margin: 0;
+  line-height: 1.35;
+}
+
+.countries-score-live {
+  margin: 0;
+  font-weight: 800;
+  color: var(--sky-deep);
+}
+
+.countries-final-score {
+  font-family: Fredoka, sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0.25rem 0;
+}
+
+.continent-map {
+  width: min(420px, 100%);
+  margin: 0.25rem auto;
+}
+
+.map-board-label {
+  text-align: center;
+  font-weight: 800;
+  color: var(--sky-deep);
+  margin: 0 0 0.35rem;
+  font-size: 0.95rem;
+}
+
+.map-stage {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1.3 / 1;
+  border-radius: 20px;
+  background:
+    radial-gradient(circle at 20% 20%, #b8e0f0 0%, transparent 45%),
+    linear-gradient(160deg, #c8ebe0, #a8d4f0);
+  border: 3px solid rgba(28, 42, 58, 0.1);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.map-region {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0.25rem;
+  border-radius: 14px;
+  border: 2px solid rgba(28, 42, 58, 0.35);
+  background: #8fbf9f;
+  color: var(--ink);
+  font-weight: 800;
+  font-size: clamp(0.65rem, 2.4vw, 0.85rem);
+  line-height: 1.15;
+  box-shadow: 0 2px 0 rgba(28, 42, 58, 0.15);
+  cursor: default;
+}
+
+button.map-region {
+  cursor: pointer;
+  font-family: inherit;
+}
+
+button.map-region:focus-visible {
+  outline: 3px solid var(--sun);
+  outline-offset: 2px;
+}
+
+.map-region.highlight {
+  background: #f0c43a;
+  z-index: 2;
+}
+
+.map-region.selected {
+  background: #7ec8e3;
+}
+
+.map-region.correct {
+  background: #69db7c;
+}
+
+.map-region.wrong {
+  background: #e86f5c;
+  color: #fff;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .countries-choice.correct,
+  .countries-reveal {
+    transition: none;
+  }
+}

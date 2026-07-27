@@ -10,6 +10,7 @@ import {
   isLabComplete,
   isLaptopUnlocked,
   loadProgress,
+  recordCountriesRound,
   recordJumbledRound,
   recordTypedWord,
   saveProgress,
@@ -80,6 +81,7 @@ describe('progress', () => {
         wordsTypedCount: 0,
       },
       jumbled: { completedDifficulties: [], bestStars: {} },
+      countries: { completedModes: [], bestStars: {} },
     })
     const p = loadProgress()
     expect(p.words.unlockedLevelIds).toContain('animals')
@@ -101,6 +103,26 @@ describe('progress', () => {
     expect(p.lab.completed).toEqual(['monitor'])
     expect(p.jumbled.completedDifficulties).toEqual([])
     expect(p.jumbled.bestStars).toEqual({})
+    expect(p.countries.completedModes).toEqual([])
+  })
+
+  it('migrates progress missing countries bucket', () => {
+    localStorage.setItem(
+      'cla-progress',
+      JSON.stringify({
+        lab: { completed: ['monitor'] },
+        words: {
+          unlockedLevelIds: ['animals'],
+          completedLevelIds: [],
+          wordsTypedCount: 0,
+        },
+        jumbled: { completedDifficulties: ['easy'], bestStars: { easy: 2 } },
+      }),
+    )
+    const p = loadProgress()
+    expect(p.jumbled.bestStars.easy).toBe(2)
+    expect(p.countries.completedModes).toEqual([])
+    expect(p.countries.bestStars).toEqual({})
   })
 
   it('records best jumbled stars without lowering a higher score', () => {
@@ -110,6 +132,18 @@ describe('progress', () => {
     jumbled = recordJumbledRound(jumbled, 'easy', 1)
     expect(jumbled.completedDifficulties).toContain('easy')
     expect(jumbled.bestStars.easy).toBe(3)
+  })
+
+  it('records best countries stars per mode without lowering', () => {
+    let countries = loadProgress().countries
+    countries = recordCountriesRound(countries, 'flags', 'easy', 2)
+    countries = recordCountriesRound(countries, 'flags', 'easy', 3)
+    countries = recordCountriesRound(countries, 'flags', 'easy', 1)
+    countries = recordCountriesRound(countries, 'maps', 'medium', 0)
+    expect(countries.completedModes).toContain('flags-easy')
+    expect(countries.completedModes).toContain('maps-medium')
+    expect(countries.bestStars['flags-easy']).toBe(3)
+    expect(countries.bestStars['maps-medium']).toBeUndefined()
   })
 
   it('word level order matches content module', () => {

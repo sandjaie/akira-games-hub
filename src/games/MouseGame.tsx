@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react'
+import { playSfx } from '../audio/sounds'
 import type { MiniGameProps } from './types'
 
 const SIZE = 52
@@ -28,6 +29,7 @@ export function MouseGame({ onComplete }: MiniGameProps) {
     setPos({ x, y })
     if (!done.current && hit(x, y)) {
       done.current = true
+      playSfx('correct')
       onComplete()
     }
   }

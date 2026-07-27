@@ -1,4 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { playSfx, stopBgm } from '../audio/sounds'
+import { SoundToggle } from '../components/SoundToggle'
 import { EXPLORER_NAME } from '../content/explorer'
 
 type Pair = { id: string; label: string; spot: string }
@@ -20,9 +22,14 @@ export function LaptopBonus({ onBack, onComplete }: Props) {
   const [matched, setMatched] = useState<string[]>([])
   const [hint, setHint] = useState('')
 
+  useEffect(() => {
+    stopBgm()
+  }, [])
+
   const tryMatch = (spotId: string) => {
     if (matched.includes(spotId)) return
     if (!selected) {
+      playSfx('hint')
       setHint('Tap a part first!')
       return
     }
@@ -32,9 +39,13 @@ export function LaptopBonus({ onBack, onComplete }: Props) {
       setSelected(null)
       setHint('Yes!')
       if (next.length === PAIRS.length) {
+        playSfx('cheer')
         onComplete()
+      } else {
+        playSfx('correct')
       }
     } else {
+      playSfx('wrong')
       setHint('Try again!')
       setSelected(null)
     }
@@ -42,8 +53,15 @@ export function LaptopBonus({ onBack, onComplete }: Props) {
 
   return (
     <main className="screen laptop">
+      <SoundToggle active={false} />
       <div className="top-bar">
-        <button type="button" onClick={onBack}>
+        <button
+          type="button"
+          onClick={() => {
+            playSfx('tap')
+            onBack()
+          }}
+        >
           Back to map
         </button>
       </div>
@@ -60,6 +78,7 @@ export function LaptopBonus({ onBack, onComplete }: Props) {
                 className={`match-label${selected === pair.id ? ' selected' : ''}${matched.includes(pair.id) ? ' used' : ''}`}
                 disabled={matched.includes(pair.id)}
                 onClick={() => {
+                  playSfx('tap')
                   setSelected(pair.id)
                   setHint('')
                 }}

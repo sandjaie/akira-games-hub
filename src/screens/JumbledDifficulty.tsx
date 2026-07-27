@@ -1,3 +1,6 @@
+import { useEffect } from 'react'
+import { playSfx, stopBgm } from '../audio/sounds'
+import { SoundToggle } from '../components/SoundToggle'
 import type { JumbledDifficulty } from '../content/jumbledWords'
 import type { JumbledProgress } from '../types'
 
@@ -13,8 +16,13 @@ function starsLabel(n: 1 | 2 | 3 | undefined): string {
 }
 
 export function JumbledDifficulty({ jumbled, onBack, onPick }: Props) {
+  useEffect(() => {
+    stopBgm()
+  }, [])
+
   return (
     <main className="screen jumbled-difficulty">
+      <SoundToggle active={false} />
       <div className="words-top-row">
         <button type="button" className="secondary" onClick={onBack}>
           ← Games
@@ -28,7 +36,10 @@ export function JumbledDifficulty({ jumbled, onBack, onPick }: Props) {
         <button
           type="button"
           className="hub-card jumbled-easy"
-          onClick={() => onPick('easy')}
+          onClick={() => {
+            playSfx('tap')
+            onPick('easy')
+          }}
           aria-label={`Easy. Short words with a picture clue.${jumbled.bestStars.easy ? ` Best ${jumbled.bestStars.easy} stars.` : ''}`}
         >
           <span className="hub-icon" aria-hidden="true">
@@ -47,7 +58,10 @@ export function JumbledDifficulty({ jumbled, onBack, onPick }: Props) {
         <button
           type="button"
           className="hub-card jumbled-medium"
-          onClick={() => onPick('medium')}
+          onClick={() => {
+            playSfx('tap')
+            onPick('medium')
+          }}
           aria-label={`Medium. Longer words with a category clue.${jumbled.bestStars.medium ? ` Best ${jumbled.bestStars.medium} stars.` : ''}`}
         >
           <span className="hub-icon" aria-hidden="true">

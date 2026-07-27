@@ -1,8 +1,15 @@
+import type {
+  CountriesDifficulty,
+  CountriesMode,
+  CountriesModeKey,
+  RoundStars,
+} from '../countries/quiz'
 import type { JumbledDifficulty } from '../content/jumbledWords'
 import { LAB_ORDER } from '../content/stations'
 import { WORD_LEVEL_ORDER, type WordLevelId } from '../content/wordLevels'
 import type {
   AppProgress,
+  CountriesProgress,
   JumbledProgress,
   LabProgress,
   LabStationId,
@@ -13,6 +20,13 @@ import type {
 const KEY = 'cla-progress'
 
 export { LAB_ORDER }
+
+const COUNTRIES_MODE_KEYS: CountriesModeKey[] = [
+  'flags-easy',
+  'flags-medium',
+  'maps-easy',
+  'maps-medium',
+]
 
 export function emptyWordsProgress(): WordsProgress {
   return {
@@ -29,11 +43,19 @@ export function emptyJumbledProgress(): JumbledProgress {
   }
 }
 
+export function emptyCountriesProgress(): CountriesProgress {
+  return {
+    completedModes: [],
+    bestStars: {},
+  }
+}
+
 export function emptyProgress(): AppProgress {
   return {
     lab: { completed: [] },
     words: emptyWordsProgress(),
     jumbled: emptyJumbledProgress(),
+    countries: emptyCountriesProgress(),
   }
 }
 
@@ -65,6 +87,20 @@ function normalizeJumbled(
   return { completedDifficulties: completed, bestStars }
 }
 
+function normalizeCountries(
+  raw: Partial<CountriesProgress> | undefined,
+): CountriesProgress {
+  const completed = (raw?.completedModes ?? []).filter((k): k is CountriesModeKey =>
+    COUNTRIES_MODE_KEYS.includes(k as CountriesModeKey),
+  )
+  const bestStars: CountriesProgress['bestStars'] = {}
+  for (const key of COUNTRIES_MODE_KEYS) {
+    const stars = raw?.bestStars?.[key]
+    if (stars === 1 || stars === 2 || stars === 3) bestStars[key] = stars
+  }
+  return { completedModes: completed, bestStars }
+}
+
 export function loadProgress(): AppProgress {
   try {
     const raw = localStorage.getItem(KEY)
@@ -75,6 +111,7 @@ export function loadProgress(): AppProgress {
         lab: { completed: parsed.completed as StationId[] },
         words: emptyWordsProgress(),
         jumbled: emptyJumbledProgress(),
+        countries: emptyCountriesProgress(),
       }
     }
     const lab = parsed.lab as LabProgress | undefined
@@ -83,6 +120,9 @@ export function loadProgress(): AppProgress {
       lab: { completed: lab.completed },
       words: normalizeWords(parsed.words as WordsProgress | undefined),
       jumbled: normalizeJumbled(parsed.jumbled as JumbledProgress | undefined),
+      countries: normalizeCountries(
+        parsed.countries as CountriesProgress | undefined,
+      ),
     }
   } catch {
     return emptyProgress()
@@ -169,4 +209,22 @@ export function recordJumbledRound(
     [difficulty]: Math.max(prev, stars) as 1 | 2 | 3,
   }
   return { completedDifficulties, bestStars }
+}
+
+export function recordCountriesRound(
+  countries: CountriesProgress,
+  mode: CountriesMode,
+  difficulty: CountriesDifficulty,
+  stars: RoundStars,
+): CountriesProgress {
+  const key = `${mode}-${difficulty}` as CountriesModeKey
+  const completedModes = countries.completedModes.includes(key)
+    ? countries.completedModes
+    : [...countries.completedModes, key]
+  const bestStars = { ...countries.bestStars }
+  if (stars >= 1) {
+    const prev = bestStars[key] ?? 0
+    bestStars[key] = Math.max(prev, stars) as 1 | 2 | 3
+  }
+  return { completedModes, bestStars }
 }

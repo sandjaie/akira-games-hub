@@ -1,3 +1,8 @@
+import type {
+  CountriesDifficulty,
+  CountriesMode,
+  CountriesModeKey,
+} from './countries/quiz'
 import type { JumbledDifficulty } from './content/jumbledWords'
 import type { WordLevelId } from './content/wordLevels'
 
@@ -26,6 +31,20 @@ export type Screen =
   | { name: 'jumbled-difficulty' }
   | { name: 'jumbled-play'; difficulty: JumbledDifficulty }
   | { name: 'jumbled-results'; difficulty: JumbledDifficulty; stars: 1 | 2 | 3 }
+  | { name: 'countries-mode' }
+  | { name: 'countries-difficulty'; mode: CountriesMode }
+  | {
+      name: 'countries-play'
+      mode: CountriesMode
+      difficulty: CountriesDifficulty
+    }
+  | {
+      name: 'countries-results'
+      mode: CountriesMode
+      difficulty: CountriesDifficulty
+      score: number
+      stars: 0 | 1 | 2 | 3
+    }
 
 export type LabProgress = { completed: StationId[] }
 
@@ -40,10 +59,16 @@ export type JumbledProgress = {
   bestStars: Partial<Record<JumbledDifficulty, 1 | 2 | 3>>
 }
 
+export type CountriesProgress = {
+  completedModes: CountriesModeKey[]
+  bestStars: Partial<Record<CountriesModeKey, 1 | 2 | 3>>
+}
+
 export type AppProgress = {
   lab: LabProgress
   words: WordsProgress
   jumbled: JumbledProgress
+  countries: CountriesProgress
 }
 
 export type GameKind =

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { playSfx } from '../audio/sounds'
 import type { MiniGameProps } from './types'
 
 export function WifiGame({ onComplete }: MiniGameProps) {
@@ -19,8 +20,10 @@ export function WifiGame({ onComplete }: MiniGameProps) {
                 const next = step + 1
                 setStep(next)
                 setHint('')
+                playSfx(next >= 3 ? 'word' : 'correct')
                 if (next >= 3) onComplete()
               } else {
+                playSfx('wrong')
                 setHint('Try again!')
               }
             }}

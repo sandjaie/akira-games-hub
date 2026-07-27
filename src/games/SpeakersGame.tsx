@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { playSfx } from '../audio/sounds'
 import type { MiniGameProps } from './types'
 
 const LEVELS = [
@@ -25,8 +26,10 @@ export function SpeakersGame({ onComplete }: MiniGameProps) {
                 const next = step + 1
                 setStep(next)
                 setHint('')
+                playSfx(next >= LEVELS.length ? 'word' : 'correct')
                 if (next >= LEVELS.length) onComplete()
               } else {
+                playSfx('wrong')
                 setHint('Try again!')
               }
             }}

@@ -1,24 +1,34 @@
 import { useEffect } from 'react'
 import { playSfx, stopBgm } from '../audio/sounds'
 import { SoundToggle } from '../components/SoundToggle'
-import type { JumbledDifficulty } from '../content/jumbledWords'
+import { ROUND_SIZE } from '../content/countries'
+import type {
+  CountriesDifficulty,
+  CountriesMode,
+  RoundStars,
+} from '../countries/quiz'
 
 type Props = {
-  difficulty: JumbledDifficulty
-  stars: 1 | 2 | 3
+  mode: CountriesMode
+  difficulty: CountriesDifficulty
+  score: number
+  stars: RoundStars
   onReplay: () => void
-  onDifficulty: () => void
+  onModes: () => void
   onHub: () => void
 }
 
-export function JumbledResults({
+export function CountriesResults({
+  mode,
   difficulty,
+  score,
   stars,
   onReplay,
-  onDifficulty,
+  onModes,
   onHub,
 }: Props) {
-  const label = difficulty === 'easy' ? 'Easy' : 'Medium'
+  const modeLabel = mode === 'flags' ? 'Flags' : 'Maps'
+  const diffLabel = difficulty === 'easy' ? 'Easy' : 'Medium'
 
   useEffect(() => {
     stopBgm()
@@ -26,17 +36,22 @@ export function JumbledResults({
   }, [])
 
   return (
-    <main className="screen jumbled-results">
+    <main className="screen countries-results">
       <SoundToggle active={false} />
       <h1 className="display cheer">You did it!</h1>
-      <p className="subtitle">{label} round finished</p>
+      <p className="subtitle">
+        {modeLabel} · {diffLabel}
+      </p>
+      <p className="countries-final-score" aria-label={`Score ${score} out of ${ROUND_SIZE}`}>
+        {score} / {ROUND_SIZE} correct
+      </p>
       <p className="jumbled-stars" aria-label={`${stars} stars`}>
         {'★'.repeat(stars)}
         <span className="jumbled-stars-empty" aria-hidden="true">
           {'☆'.repeat(3 - stars)}
         </span>
       </p>
-      <p>Great unscrambling!</p>
+      <p>Keep exploring the world!</p>
       <div className="actions">
         <button
           type="button"
@@ -52,10 +67,10 @@ export function JumbledResults({
           className="secondary"
           onClick={() => {
             playSfx('tap')
-            onDifficulty()
+            onModes()
           }}
         >
-          Pick level
+          Change mode
         </button>
         <button
           type="button"

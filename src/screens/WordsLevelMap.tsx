@@ -1,4 +1,7 @@
+import { useEffect } from 'react'
+import { playSfx, stopBgm } from '../audio/sounds'
 import { Rainbow } from '../components/Rainbow'
+import { SoundToggle } from '../components/SoundToggle'
 import {
   WORD_LEVEL_ORDER,
   WORD_LEVELS,
@@ -14,8 +17,13 @@ type Props = {
 }
 
 export function WordsLevelMap({ words, onBack, onPlay }: Props) {
+  useEffect(() => {
+    stopBgm()
+  }, [])
+
   return (
     <main className="screen words-map">
+      <SoundToggle active={false} />
       <Rainbow />
       <div className="words-top-row">
         <button type="button" className="secondary" onClick={onBack}>
@@ -36,7 +44,10 @@ export function WordsLevelMap({ words, onBack, onPlay }: Props) {
               type="button"
               className={`word-level status-${status}`}
               disabled={status === 'locked'}
-              onClick={() => onPlay(id)}
+              onClick={() => {
+                playSfx('tap')
+                onPlay(id)
+              }}
             >
               <span>
                 {level.emoji} {level.title}

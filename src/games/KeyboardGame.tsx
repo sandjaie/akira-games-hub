@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { playSfx } from '../audio/sounds'
 import type { MiniGameProps } from './types'
 
 const WORD = 'CAT'
@@ -25,8 +26,10 @@ export function KeyboardGame({ onComplete }: MiniGameProps) {
                 const next = index + 1
                 setIndex(next)
                 setHint('')
+                playSfx(next >= WORD.length ? 'word' : 'correct')
                 if (next >= WORD.length) onComplete()
               } else {
+                playSfx('wrong')
                 setHint('Try again!')
               }
             }}

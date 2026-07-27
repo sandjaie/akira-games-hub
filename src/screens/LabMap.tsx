@@ -1,3 +1,6 @@
+import { useEffect } from 'react'
+import { playSfx, stopBgm } from '../audio/sounds'
+import { SoundToggle } from '../components/SoundToggle'
 import { EXPLORER_NAME } from '../content/explorer'
 import { LAB_ORDER, STATIONS } from '../content/stations'
 import { getLabStatus, isLaptopUnlocked } from '../progress/progress'
@@ -14,8 +17,13 @@ export function LabMap({ progress, onHub, onOpenStation, onOpenLaptop }: Props) 
   const laptopOpen = isLaptopUnlocked(progress)
   const laptopDone = progress.completed.includes('laptop')
 
+  useEffect(() => {
+    stopBgm()
+  }, [])
+
   return (
     <main className="screen map">
+      <SoundToggle active={false} />
       <div className="words-top-row">
         <button type="button" className="secondary" onClick={onHub}>
           ← Games
@@ -39,7 +47,10 @@ export function LabMap({ progress, onHub, onOpenStation, onOpenLaptop }: Props) 
               type="button"
               className={`hotspot hotspot-${id} status-${status}`}
               disabled={status === 'locked'}
-              onClick={() => onOpenStation(id)}
+              onClick={() => {
+                playSfx('tap')
+                onOpenStation(id)
+              }}
             >
               {STATIONS[id].mapLabel}
               {status === 'done' ? <span className="star">★</span> : null}
@@ -51,7 +62,10 @@ export function LabMap({ progress, onHub, onOpenStation, onOpenLaptop }: Props) 
         type="button"
         className="laptop-bonus"
         disabled={!laptopOpen}
-        onClick={onOpenLaptop}
+        onClick={() => {
+          playSfx('tap')
+          onOpenLaptop()
+        }}
       >
         {laptopDone ? '★ ' : ''}
         Laptop peek

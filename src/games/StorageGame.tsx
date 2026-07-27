@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { playSfx } from '../audio/sounds'
 import type { MiniGameProps } from './types'
 
 const FILES = [
@@ -13,6 +14,7 @@ export function StorageGame({ onComplete }: MiniGameProps) {
     if (inBox.includes(id)) return
     const next = [...inBox, id]
     setInBox(next)
+    playSfx(next.length === FILES.length ? 'word' : 'correct')
     if (next.length === FILES.length) onComplete()
   }
 

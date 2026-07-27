@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { playSfx } from '../audio/sounds'
 import type { MiniGameProps } from './types'
 
 const SEQUENCE = [0, 2, 1]
@@ -24,6 +25,7 @@ export function MemoryGame({ onComplete }: MiniGameProps) {
         return
       }
       setLit(SEQUENCE[i])
+      playSfx('hint')
       timers.push(
         window.setTimeout(() => {
           setLit(null)
@@ -55,8 +57,10 @@ export function MemoryGame({ onComplete }: MiniGameProps) {
                 const next = step + 1
                 setStep(next)
                 setHint('')
+                playSfx(next >= SEQUENCE.length ? 'word' : 'correct')
                 if (next >= SEQUENCE.length) onComplete()
               } else {
+                playSfx('wrong')
                 setStep(0)
                 setHint('Try again from the start!')
               }

@@ -1,4 +1,6 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { playSfx, stopBgm } from '../audio/sounds'
+import { SoundToggle } from '../components/SoundToggle'
 import { EXPLORER_NAME } from '../content/explorer'
 import { STATIONS } from '../content/stations'
 import { gameRegistry } from '../games/gameRegistry'
@@ -22,18 +24,30 @@ export function StationScene({
   const completedRef = useRef(false)
   const Game = gameRegistry[station.game]
 
+  useEffect(() => {
+    stopBgm()
+  }, [])
+
   const handleComplete = () => {
     if (!completedRef.current) {
       completedRef.current = true
       onCompletedStation(stationId)
     }
+    playSfx('cheer')
     setPhase('reward')
   }
 
   return (
     <main className="screen station">
+      <SoundToggle active={false} />
       <div className="top-bar">
-        <button type="button" onClick={onBack}>
+        <button
+          type="button"
+          onClick={() => {
+            playSfx('tap')
+            onBack()
+          }}
+        >
           Back to map
         </button>
       </div>
@@ -47,7 +61,13 @@ export function StationScene({
           <p>{station.blurb[0]}</p>
           <p>{station.blurb[1]}</p>
           <div className="actions">
-            <button type="button" onClick={() => setPhase('play')}>
+            <button
+              type="button"
+              onClick={() => {
+                playSfx('whoosh')
+                setPhase('play')
+              }}
+            >
               Play!
             </button>
           </div>
@@ -66,7 +86,13 @@ export function StationScene({
           <h2 className="display">You found it, {EXPLORER_NAME}!</h2>
           <p>Nice exploring.</p>
           <div className="actions">
-            <button type="button" onClick={onBack}>
+            <button
+              type="button"
+              onClick={() => {
+                playSfx('tap')
+                onBack()
+              }}
+            >
               Back to map
             </button>
           </div>

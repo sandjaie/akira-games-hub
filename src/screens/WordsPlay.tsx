@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
+import { playSfx, stopBgm } from '../audio/sounds'
 import { Rainbow } from '../components/Rainbow'
+import { SoundToggle } from '../components/SoundToggle'
 import {
   getWordLevel,
   loadLevelWords,
@@ -48,6 +50,10 @@ export function WordsPlay({
   wordsRef.current = words
 
   useEffect(() => {
+    stopBgm()
+  }, [])
+
+  useEffect(() => {
     let cancelled = false
     setRoundWords(null)
     setTyping(null)
@@ -58,6 +64,7 @@ export function WordsPlay({
       setRoundWords(list)
       setTyping(createTypingState(list[0]))
       setDropKey((k) => k + 1)
+      playSfx('whoosh')
     })
     return () => {
       cancelled = true
@@ -66,12 +73,16 @@ export function WordsPlay({
 
   function pressKey(key: string) {
     if (!typing || wordDone) return
-    setTyping((s) => (s ? reduceTyping(s, { type: 'KEY', key }) : s))
+    const next = reduceTyping(typing, { type: 'KEY', key })
+    setTyping(next)
+    if (next.wrong) playSfx('wrong')
+    else if (next.index > typing.index) playSfx('correct')
   }
 
   function pressBackspace() {
     if (!typing || wordDone) return
     setTyping((s) => (s ? reduceTyping(s, { type: 'BACKSPACE' }) : s))
+    playSfx('tap')
   }
 
   function advance(countWord: boolean) {
@@ -92,16 +103,19 @@ export function WordsPlay({
     setTyping(createTypingState(roundWords[nextIndex]))
     setDropKey((k) => k + 1)
     setWordDone(false)
+    playSfx('whoosh')
   }
 
   function pressDone() {
     if (!typing) return
     if (!isWordComplete(typing) && !wordDone) return
+    playSfx('tap')
     advance(true)
   }
 
   function pressNext() {
     if (!typing) return
+    playSfx('tap')
     advance(wordDone || isWordComplete(typing))
   }
 
@@ -116,6 +130,7 @@ export function WordsPlay({
   useEffect(() => {
     if (!typing || !isWordComplete(typing) || wordDone) return
     setWordDone(true)
+    playSfx('word')
   }, [typing, wordDone])
 
   useEffect(() => {
@@ -129,12 +144,12 @@ export function WordsPlay({
       if (wordDone) return
       if (e.key === 'Backspace') {
         e.preventDefault()
-        setTyping((s) => (s ? reduceTyping(s, { type: 'BACKSPACE' }) : s))
+        pressBackspace()
         return
       }
       if (e.key.length === 1 && /[a-z]/i.test(e.key)) {
         e.preventDefault()
-        setTyping((s) => (s ? reduceTyping(s, { type: 'KEY', key: e.key }) : s))
+        pressKey(e.key)
       }
     }
     window.addEventListener('keydown', onKeyDown)
@@ -144,6 +159,7 @@ export function WordsPlay({
   if (!roundWords || !typing) {
     return (
       <main className="screen words-play">
+        <SoundToggle active={false} />
         <div className="words-top-row">
           <button type="button" className="secondary" onClick={onBack}>
             ← Themes
@@ -168,6 +184,7 @@ export function WordsPlay({
 
   return (
     <main className="screen words-play">
+      <SoundToggle active={false} />
       <div className="words-top-row">
         <button type="button" className="secondary" onClick={onBack}>
           ← Themes
