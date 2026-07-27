@@ -47,6 +47,24 @@ Example: `http://192.168.1.20:5173`
 | `npm run build` | Production build |
 | `npm run preview` | Preview the build with `--host` |
 
-Progress (lab stars + word level unlocks) is saved in the browser, so a refresh keeps her place.
+Progress (lab stars + word level unlocks) is saved in the browser only — no database. A refresh keeps her place on that device.
 
 UI mockup reference: `docs/superpowers/mockups/fun-with-words-mockup.html`
+
+## Deploy on Vercel (anytime play + password)
+
+1. Push this repo to GitHub (`akira-games-hub`).
+2. In [Vercel](https://vercel.com): **Add New Project** → import `akira-games-hub` → Deploy (Vite is auto-detected).
+3. Project → **Settings → Environment Variables** (Production):
+
+| Name | Example |
+|------|---------|
+| `SITE_USER` | `akira` |
+| `SITE_PASSWORD` | *(pick a family password)* |
+
+4. Redeploy so the env vars apply.
+5. Open the Vercel URL — the browser will ask for username/password (HTTP Basic Auth via `middleware.ts`).
+
+Local `npm run play` stays unlocked (auth only runs when those env vars are set on Vercel).
+
+See `.env.example` for the variable names. Never commit real passwords.
