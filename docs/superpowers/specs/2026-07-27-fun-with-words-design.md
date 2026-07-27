@@ -29,7 +29,7 @@ No accounts, no online backend. Progress stays in `localStorage`. Parent still r
 | Styling | CSS in existing `App.css` / `index.css` | Brighter kids palette on hub + Words screens |
 | Backend | None | Static site only |
 | Persistence | `localStorage` | Separate buckets for lab vs words |
-| Input | Physical keyboard | No on-screen letter pad in Fun with Words v1 |
+| Input | Physical keyboard **and** on-screen letter taps | Phone / iPad friendly |
 
 ---
 
@@ -64,7 +64,7 @@ Unchanged once entered from the hub: map → station → laptop → celebration.
 
 ## 4. Typing rules (explicit)
 
-- Physical keyboard only.
+- Physical keyboard **and** big on-screen letter taps (iPad / phone).
 - Case-insensitive matching (typing `c` counts for `C`); display words in friendly uppercase for kids.
 - Only the next expected letter advances progress.
 - Wrong key: visual nudge only; no advance; no hard fail of the whole word.

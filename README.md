@@ -2,7 +2,7 @@
 
 A colorful game hub for kids — **Parts of the computer** (lab story + mini-games) and **Fun with Words** (rainbow typing practice).
 
-Built for a 6-year-old explorer: short sentences, big taps, playable on a laptop and iPad on the same Wi‑Fi. Fun with Words uses the **physical keyboard** on the laptop.
+Built for a 6-year-old explorer: short sentences, big taps, playable on a laptop and iPad on the same Wi‑Fi. Fun with Words works with a **physical keyboard** or **on-screen letter taps** (iPad / phone).
 
 ## Play on this laptop
 
@@ -35,7 +35,7 @@ ipconfig getifaddr en0
 
 Example: `http://192.168.1.20:5173`
 
-(Lab adventure works great on iPad; Fun with Words is best on the laptop keyboard.)
+(Lab adventure and Fun with Words both work on iPad / phone; laptop keyboard still works for typing too.)
 
 ## Scripts
 

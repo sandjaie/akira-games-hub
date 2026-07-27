@@ -13,6 +13,8 @@ import {
   type TypingState,
 } from '../words/typing'
 
+const LETTER_ROWS = ['QWERTYUIOP', 'ASDFGHJKL', 'ZXCVBNM'] as const
+
 type Props = {
   levelId: WordLevelId
   words: WordsProgress
@@ -38,6 +40,16 @@ export function WordsPlay({
   const wordsRef = useRef(words)
   wordsRef.current = words
   const finishingRef = useRef(false)
+
+  function pressKey(key: string) {
+    if (cheering) return
+    setTyping((s) => reduceTyping(s, { type: 'KEY', key }))
+  }
+
+  function pressBackspace() {
+    if (cheering) return
+    setTyping((s) => reduceTyping(s, { type: 'BACKSPACE' }))
+  }
 
   useEffect(() => {
     if (!typing.wrong) return
@@ -129,11 +141,38 @@ export function WordsPlay({
         <p className="hint">
           {cheering
             ? 'You typed it!'
-            : 'Type the word that fell from the rainbow'}
+            : 'Tap the letters or use a keyboard'}
         </p>
         <p className="word-progress-count">
           Word {wordIndex + 1} of {level.words.length}
         </p>
+        <div className="words-keyboard" aria-label="Letter keys">
+          {LETTER_ROWS.map((row) => (
+            <div key={row} className="words-key-row">
+              {row.split('').map((letter) => (
+                <button
+                  key={letter}
+                  type="button"
+                  className="words-key"
+                  disabled={cheering}
+                  onClick={() => pressKey(letter)}
+                >
+                  {letter}
+                </button>
+              ))}
+            </div>
+          ))}
+          <div className="words-key-row">
+            <button
+              type="button"
+              className="words-key words-key-wide"
+              disabled={cheering}
+              onClick={pressBackspace}
+            >
+              ⌫ Erase
+            </button>
+          </div>
+        </div>
       </div>
     </main>
   )

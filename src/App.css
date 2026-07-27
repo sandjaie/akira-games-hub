@@ -833,7 +833,80 @@
   text-align: center;
   font-weight: 800;
   opacity: 0.7;
-  margin: 0.25rem 0 0;
+  margin: 0.25rem 0 0.75rem;
+}
+
+.words-keyboard {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 0.4rem;
+  margin-top: 0.25rem;
+  padding-bottom: 0.25rem;
+}
+
+.words-key-row {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+  gap: 0.3rem;
+}
+
+.words-key {
+  flex: 0 1 auto;
+  min-width: clamp(28px, 8.2vw, 48px);
+  min-height: var(--tap-min);
+  padding: 0.35rem 0.2rem;
+  border-radius: 12px;
+  border: 3px solid rgba(28, 42, 58, 0.1);
+  background: #fff7d6;
+  color: var(--ink);
+  font-family: Fredoka, Nunito, sans-serif;
+  font-size: clamp(0.95rem, 3.4vw, 1.25rem);
+  font-weight: 700;
+  box-shadow: 0 3px 0 rgba(28, 42, 58, 0.12);
+  touch-action: manipulation;
+}
+
+.words-key:active:not(:disabled) {
+  transform: translateY(2px);
+  box-shadow: none;
+}
+
+.words-key-wide {
+  min-width: min(220px, 70vw);
+  background: #ffe0d6;
+}
+
+.words-play .drop-zone {
+  height: clamp(120px, 28vw, 200px);
+}
+
+.words-play .falling-word {
+  font-size: clamp(2rem, 8vw, 3.6rem);
+}
+
+.words-play .rainbow {
+  --r-h: clamp(64px, 18vw, 120px);
+}
+
+@media (max-width: 480px) {
+  .words-key-row {
+    gap: 0.22rem;
+  }
+
+  .words-key {
+    min-width: 0;
+    flex: 1 1 0;
+    padding: 0.4rem 0;
+    border-width: 2px;
+    border-radius: 10px;
+  }
+
+  .play-stage {
+    min-height: 0;
+    padding: 0.35rem 0.55rem 0.85rem;
+  }
 }
 
 @keyframes fall-from-rainbow {

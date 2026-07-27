@@ -12,7 +12,7 @@
 
 - Explorer name: `Akira` via `src/content/explorer.ts` (`EXPLORER_NAME`)
 - No backend, accounts, timers, or WPM UI in v1
-- Fun with Words: physical keyboard only; case-insensitive; wrong key does not advance; Backspace undoes one correct letter
+- Fun with Words: physical keyboard **and** on-screen letter taps; case-insensitive; wrong key does not advance; Backspace / Erase undoes one correct letter
 - One word at a time; calm drop from classic stacked rainbow arcs (not a multi-word shooter)
 - Levels in order: `animals` → `colors` → `school` → `home` → `play`; `animals` always unlocked
 - Lab KeyboardGame (`CAT` tap keys) stays as-is; no shared unlocks with Fun with Words
