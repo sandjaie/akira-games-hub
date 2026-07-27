@@ -36,19 +36,46 @@ export function WordsPlay({
     createTypingState(level.words[0]),
   )
   const [dropKey, setDropKey] = useState(0)
-  const [cheering, setCheering] = useState(false)
+  const [wordDone, setWordDone] = useState(false)
   const wordsRef = useRef(words)
   wordsRef.current = words
-  const finishingRef = useRef(false)
 
   function pressKey(key: string) {
-    if (cheering) return
+    if (wordDone) return
     setTyping((s) => reduceTyping(s, { type: 'KEY', key }))
   }
 
   function pressBackspace() {
-    if (cheering) return
+    if (wordDone) return
     setTyping((s) => reduceTyping(s, { type: 'BACKSPACE' }))
+  }
+
+  function advance(countWord: boolean) {
+    let nextWords = wordsRef.current
+    if (countWord) {
+      nextWords = recordTypedWord(nextWords)
+      onWordsChange(nextWords)
+    }
+
+    const nextIndex = wordIndex + 1
+    if (nextIndex >= level.words.length) {
+      onWordsChange(completeWordLevel(nextWords, levelId))
+      onLevelComplete()
+      return
+    }
+    setWordIndex(nextIndex)
+    setTyping(createTypingState(level.words[nextIndex]))
+    setDropKey((k) => k + 1)
+    setWordDone(false)
+  }
+
+  function pressDone() {
+    if (!isWordComplete(typing) && !wordDone) return
+    advance(true)
+  }
+
+  function pressNext() {
+    advance(wordDone || isWordComplete(typing))
   }
 
   useEffect(() => {
@@ -60,41 +87,20 @@ export function WordsPlay({
   }, [typing.wrong])
 
   useEffect(() => {
-    if (!isWordComplete(typing) || cheering || finishingRef.current) return
-
-    finishingRef.current = true
-    setCheering(true)
-    const nextWords = recordTypedWord(wordsRef.current)
-    onWordsChange(nextWords)
-
-    const id = window.setTimeout(() => {
-      const nextIndex = wordIndex + 1
-      if (nextIndex >= level.words.length) {
-        onWordsChange(completeWordLevel(nextWords, levelId))
-        onLevelComplete()
-        return
-      }
-      setWordIndex(nextIndex)
-      setTyping(createTypingState(level.words[nextIndex]))
-      setDropKey((k) => k + 1)
-      setCheering(false)
-      finishingRef.current = false
-    }, 500)
-
-    return () => window.clearTimeout(id)
-  }, [
-    typing,
-    cheering,
-    wordIndex,
-    level.words,
-    levelId,
-    onWordsChange,
-    onLevelComplete,
-  ])
+    if (!isWordComplete(typing) || wordDone) return
+    setWordDone(true)
+  }, [typing, wordDone])
 
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
-      if (cheering) return
+      if (e.key === 'Enter') {
+        e.preventDefault()
+        if (wordDone || isWordComplete(typing)) {
+          advance(true)
+        }
+        return
+      }
+      if (wordDone) return
       if (e.key === 'Backspace') {
         e.preventDefault()
         setTyping((s) => reduceTyping(s, { type: 'BACKSPACE' }))
@@ -107,11 +113,13 @@ export function WordsPlay({
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [cheering])
+  })
 
   const done = typing.word.slice(0, typing.index)
   const current = typing.word[typing.index] ?? ''
   const todo = typing.word.slice(typing.index + 1)
+  const canDone = wordDone || isWordComplete(typing)
+  const isLast = wordIndex >= level.words.length - 1
 
   return (
     <main className="screen words-play">
@@ -130,7 +138,7 @@ export function WordsPlay({
         <div className="drop-zone">
           <p
             key={dropKey}
-            className={`falling-word${typing.wrong ? ' shake' : ''}${cheering ? ' cheer-word' : ''}`}
+            className={`falling-word${typing.wrong ? ' shake' : ''}${wordDone ? ' cheer-word' : ''}`}
             aria-live="polite"
           >
             <span className="done">{done}</span>
@@ -139,9 +147,11 @@ export function WordsPlay({
           </p>
         </div>
         <p className="hint">
-          {cheering
-            ? 'You typed it!'
-            : 'Tap the letters or use a keyboard'}
+          {wordDone
+            ? isLast
+              ? 'Nice! Tap Done to finish the theme'
+              : 'Nice! Tap Done or Next for the next word'
+            : 'Tap the letters — or Next to skip'}
         </p>
         <p className="word-progress-count">
           Word {wordIndex + 1} of {level.words.length}
@@ -154,7 +164,7 @@ export function WordsPlay({
                   key={letter}
                   type="button"
                   className="words-key"
-                  disabled={cheering}
+                  disabled={wordDone}
                   onClick={() => pressKey(letter)}
                 >
                   {letter}
@@ -162,14 +172,29 @@ export function WordsPlay({
               ))}
             </div>
           ))}
-          <div className="words-key-row">
+          <div className="words-key-row words-key-actions">
             <button
               type="button"
-              className="words-key words-key-wide"
-              disabled={cheering}
+              className="words-key words-key-action"
+              disabled={wordDone}
               onClick={pressBackspace}
             >
-              ⌫ Erase
+              ⌫ Backspace
+            </button>
+            <button
+              type="button"
+              className="words-key words-key-action words-key-next"
+              onClick={pressNext}
+            >
+              {isLast ? 'Finish →' : 'Next →'}
+            </button>
+            <button
+              type="button"
+              className="words-key words-key-action words-key-done"
+              disabled={!canDone}
+              onClick={pressDone}
+            >
+              Done ✓
             </button>
           </div>
         </div>

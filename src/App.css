@@ -878,6 +878,33 @@
   background: #ffe0d6;
 }
 
+.words-key-actions {
+  flex-wrap: wrap;
+  margin-top: 0.35rem;
+  gap: 0.45rem;
+}
+
+.words-key-action {
+  flex: 1 1 30%;
+  min-width: min(110px, 28vw);
+  padding: 0.55rem 0.4rem;
+  font-size: clamp(0.85rem, 3vw, 1.05rem);
+}
+
+.words-key-next {
+  background: #d8f1fb;
+  border-color: #7ec8e3;
+}
+
+.words-key-done {
+  background: #d8f5e0;
+  border-color: #69db7c;
+}
+
+.words-key-done:disabled {
+  opacity: 0.45;
+}
+
 .words-play .drop-zone {
   height: clamp(120px, 28vw, 200px);
 }
