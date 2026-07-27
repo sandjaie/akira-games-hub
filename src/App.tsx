@@ -3,6 +3,7 @@ import './App.css'
 import {
   clearProgress,
   completeStation,
+  emptyProgress,
   loadProgress,
   saveProgress,
 } from './progress/progress'
@@ -11,10 +12,10 @@ import { LabMap } from './screens/LabMap'
 import { LaptopBonus } from './screens/LaptopBonus'
 import { StationScene } from './screens/StationScene'
 import { Welcome } from './screens/Welcome'
-import type { Progress, Screen } from './types'
+import type { AppProgress, Screen } from './types'
 
 export default function App() {
-  const [progress, setProgress] = useState<Progress>(() => loadProgress())
+  const [progress, setProgress] = useState<AppProgress>(() => loadProgress())
   const [screen, setScreen] = useState<Screen>({ name: 'welcome' })
 
   useEffect(() => {
@@ -28,7 +29,7 @@ export default function App() {
   if (screen.name === 'map') {
     return (
       <LabMap
-        progress={progress}
+        progress={progress.lab}
         onOpenStation={(stationId) => setScreen({ name: 'station', stationId })}
         onOpenLaptop={() => setScreen({ name: 'laptop' })}
       />
@@ -41,7 +42,7 @@ export default function App() {
         stationId={screen.stationId}
         onBack={() => setScreen({ name: 'map' })}
         onCompletedStation={(id) => {
-          setProgress((p) => completeStation(p, id))
+          setProgress((p) => ({ ...p, lab: completeStation(p.lab, id) }))
         }}
       />
     )
@@ -52,7 +53,7 @@ export default function App() {
       <LaptopBonus
         onBack={() => setScreen({ name: 'map' })}
         onComplete={() => {
-          setProgress((p) => completeStation(p, 'laptop'))
+          setProgress((p) => ({ ...p, lab: completeStation(p.lab, 'laptop') }))
           setScreen({ name: 'celebration' })
         }}
       />
@@ -64,7 +65,7 @@ export default function App() {
       onMap={() => setScreen({ name: 'map' })}
       onReplay={() => {
         clearProgress()
-        setProgress({ completed: [] })
+        setProgress(emptyProgress())
         setScreen({ name: 'welcome' })
       }}
     />

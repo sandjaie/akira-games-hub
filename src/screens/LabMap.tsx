@@ -1,9 +1,10 @@
+import { EXPLORER_NAME } from '../content/explorer'
 import { LAB_ORDER, STATIONS } from '../content/stations'
 import { getLabStatus, isLaptopUnlocked } from '../progress/progress'
-import type { LabStationId, Progress } from '../types'
+import type { LabProgress, LabStationId } from '../types'
 
 type Props = {
-  progress: Progress
+  progress: LabProgress
   onOpenStation: (id: LabStationId) => void
   onOpenLaptop: () => void
 }
@@ -14,8 +15,8 @@ export function LabMap({ progress, onOpenStation, onOpenLaptop }: Props) {
 
   return (
     <main className="screen map">
-      <h1 className="display">Lab map</h1>
-      <p>Pick a glowing part.</p>
+      <h1 className="display">{EXPLORER_NAME}&apos;s lab map</h1>
+      <p>Pick a glowing part, {EXPLORER_NAME}.</p>
       <div className="lab-stage" aria-label="School lab computer">
         <div className="pc-art" aria-hidden="true">
           <div className="pc-monitor" />
