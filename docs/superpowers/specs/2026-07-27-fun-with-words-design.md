@@ -116,7 +116,7 @@ Refresh must not wipe lab stars or words unlocks.
 - **Palette:** sky blue, sunny yellow, coral cheers, leafy green for correct letters, soft lavender panels — high contrast for readability.
 - **Type:** Fredoka titles, Nunito body; typing word extra large with clear letter spacing.
 - **Hub cards:** distinct color stripe per game, soft shadow, short bounce on press.
-- **Rainbow:** Soft multi-color arc across the **top** of Fun with Words screens (and optionally a smaller rainbow accent on the hub’s Fun with Words card). Not neon-strobing — gentle candy stripes.
+- **Rainbow:** Classic **stacked color arcs** (red → orange → yellow → green → blue → violet) across the **top** of Fun with Words screens, plus a smaller version on the hub / Fun with Words card. Soft candy colors — not neon strobing, not a single gradient blob.
 - **Word drop:** Word starts near the rainbow and eases down into the typing area (~0.6–1s), then stays put for typing. Large, high-contrast letters remain readable during the fall.
 - **Typing feedback:** current letter gently emphasized; success = green fill + light sparkle; mistake = quick coral shake (not harsh red).
 - **Motion budget:** rainbow-present word drop, card bounce, letter pop, level-clear confetti-style burst — calm, not strobing.
