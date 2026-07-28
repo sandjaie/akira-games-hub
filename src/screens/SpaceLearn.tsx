@@ -24,6 +24,9 @@ export function SpaceLearn({ missionId, onBack, onLearned, onQuiz }: Props) {
   )
   const card = cards[index]
   const last = index >= cards.length - 1
+  // remember the photo that failed, not a bare flag, so the next card retries
+  const [brokenPhoto, setBrokenPhoto] = useState<string | null>(null)
+  const photo = card.photo && card.photo !== brokenPhoto ? card.photo : null
 
   useEffect(() => {
     stopBgm()
@@ -65,13 +68,23 @@ export function SpaceLearn({ missionId, onBack, onLearned, onQuiz }: Props) {
       </div>
 
       <article className="learn-card" aria-live="polite">
-        <SpaceArt kind={card.art} className="learn-art" />
+        {photo ? (
+          <img
+            className="learn-art learn-photo"
+            src={photo}
+            alt=""
+            onError={() => setBrokenPhoto(photo)}
+          />
+        ) : (
+          <SpaceArt kind={card.art} className="learn-art" />
+        )}
         <h1 className="learn-title">{card.title}</h1>
         {card.lines.map((line) => (
           <p key={line} className="learn-line">
             {line}
           </p>
         ))}
+        {photo ? <p className="learn-credit">Photo from Wikipedia</p> : null}
       </article>
 
       <p className="learn-count">

@@ -23,6 +23,12 @@ export type LearnCard = {
   title: string
   /** One or two short lines — read-aloud length. */
   lines: string[]
+  /**
+   * Real photo for cards the fact engine built, taken from the same Wikipedia
+   * summary the words came from. Falls back to `art` when there is no picture
+   * or it fails to load. Curated cards stay hand-drawn on purpose.
+   */
+  photo?: string
 }
 
 export type Choice = { id: string; label: string; art: SpaceArtKind }

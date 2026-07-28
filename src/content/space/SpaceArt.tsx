@@ -52,6 +52,40 @@ function Stars({ seed = 0, count = 14 }: { seed?: number; count?: number }) {
   )
 }
 
+/**
+ * Sunlight from the top left and a soft shadow at the bottom right, so a flat
+ * circle reads as a round ball. Kept gentle on purpose: Mars still has to look
+ * obviously red to a six-year-old.
+ */
+function Shading({ cx, cy, r }: { cx: number; cy: number; r: number }) {
+  return (
+    <>
+      <circle cx={cx} cy={cy} r={r} fill="url(#art-shade)" />
+      <circle cx={cx} cy={cy} r={r} fill="url(#art-lit)" />
+    </>
+  )
+}
+
+/** A plain lit ball, for the little planets in the group pictures. */
+function Orb({
+  cx,
+  cy,
+  r,
+  fill,
+}: {
+  cx: number
+  cy: number
+  r: number
+  fill: string
+}) {
+  return (
+    <g>
+      <circle cx={cx} cy={cy} r={r} fill={fill} />
+      <Shading cx={cx} cy={cy} r={r} />
+    </g>
+  )
+}
+
 function Planet({
   cx = 60,
   cy = 60,
@@ -65,29 +99,22 @@ function Planet({
   fill: string
   children?: React.ReactNode
 }) {
+  const clip = `clip-${fill.replace('#', '')}-${cx}-${cy}-${r}`
   return (
     <g>
       <circle cx={cx} cy={cy} r={r} fill={fill} />
-      <clipPath id={`clip-${fill.replace('#', '')}-${cx}-${cy}-${r}`}>
+      <clipPath id={clip}>
         <circle cx={cx} cy={cy} r={r} />
       </clipPath>
-      <g clipPath={`url(#clip-${fill.replace('#', '')}-${cx}-${cy}-${r})`}>
-        {children}
-      </g>
+      <g clipPath={`url(#${clip})`}>{children}</g>
+      <Shading cx={cx} cy={cy} r={r} />
       <circle
         cx={cx}
         cy={cy}
         r={r}
         fill="none"
-        stroke="rgba(0,0,0,0.18)"
+        stroke="rgba(0,0,0,0.16)"
         strokeWidth="2"
-      />
-      <ellipse
-        cx={cx - r * 0.35}
-        cy={cy - r * 0.4}
-        rx={r * 0.3}
-        ry={r * 0.2}
-        fill="rgba(255,255,255,0.25)"
       />
     </g>
   )
@@ -213,8 +240,10 @@ const SUN = (
         )
       })}
     </g>
+    <circle cx="60" cy="60" r="52" fill="url(#art-glow)" />
     <circle cx="60" cy="60" r="34" fill="#ffce3d" />
     <circle cx="60" cy="60" r="24" fill="#ffe37a" />
+    <circle cx="60" cy="60" r="13" fill="#fff6cf" />
   </g>
 )
 
@@ -263,39 +292,55 @@ function Phase({ cx, lit }: { cx: number; lit: number }) {
   )
 }
 
-const ART: Record<SpaceArtKind, { space?: boolean; body: React.ReactNode }> = {
-  sun: { body: SUN },
-  mercury: { space: true, body: MERCURY },
-  venus: { space: true, body: VENUS },
-  earth: { space: true, body: EARTH },
-  mars: { space: true, body: MARS },
-  jupiter: { space: true, body: JUPITER },
-  saturn: { space: true, body: SATURN },
-  uranus: { space: true, body: URANUS },
-  neptune: { space: true, body: NEPTUNE },
+/**
+ * `zoom` blows the subject up around the middle of the box so it fills the
+ * card instead of floating in a sea of empty sky. Only set it on pictures with
+ * nothing pinned to an edge — anything with ground, a caption or a wide ring
+ * stays at 1 or it would get cropped.
+ */
+const ART: Record<
+  SpaceArtKind,
+  { space?: boolean; zoom?: number; bare?: boolean; body: React.ReactNode }
+> = {
+  // `bare` = draws no background box, so the card shadow would trace the rays
+  sun: { zoom: 1.1, bare: true, body: SUN },
+  mercury: { space: true, zoom: 1.3, body: MERCURY },
+  venus: { space: true, zoom: 1.3, body: VENUS },
+  earth: { space: true, zoom: 1.3, body: EARTH },
+  mars: { space: true, zoom: 1.3, body: MARS },
+  jupiter: { space: true, zoom: 1.3, body: JUPITER },
+  saturn: { space: true, zoom: 1.08, body: SATURN },
+  uranus: { space: true, zoom: 1.3, body: URANUS },
+  neptune: { space: true, zoom: 1.3, body: NEPTUNE },
   pluto: { space: true, body: PLUTO },
-  moon: { space: true, body: MOON },
+  moon: { space: true, zoom: 1.3, body: MOON },
 
   'solar-system': {
     space: true,
     body: (
       <g>
-        <circle cx="6" cy="60" r="22" fill="#ffce3d" />
+        <circle cx="2" cy="60" r="20" fill="#ffce3d" />
         {[
-          ['#9aa0a6', 34, 5],
-          ['#e8b96a', 48, 7],
-          ['#4aa3dd', 63, 7],
-          ['#d2603c', 77, 6],
-          ['#e0b184', 95, 12],
-          ['#f0d9a6', 114, 10],
+          ['#9aa0a6', 28, 4],
+          ['#e8b96a', 40, 6],
+          ['#4aa3dd', 53, 6],
+          ['#d2603c', 65, 5],
+          ['#e0b184', 82, 11],
+          ['#f0d9a6', 105, 8],
         ].map(([fill, x, r]) => (
-          <circle key={x} cx={x as number} cy="60" r={r as number} fill={fill as string} />
+          <Orb
+            key={x as number}
+            cx={x as number}
+            cy={60}
+            r={r as number}
+            fill={fill as string}
+          />
         ))}
         <ellipse
-          cx="114"
+          cx="105"
           cy="60"
-          rx="17"
-          ry="5"
+          rx="14"
+          ry="4.5"
           fill="none"
           stroke="#e6d3a3"
           strokeWidth="3"
@@ -314,7 +359,13 @@ const ART: Record<SpaceArtKind, { space?: boolean; body: React.ReactNode }> = {
           ['#4aa3dd', 82, 14],
           ['#d2603c', 108, 10],
         ].map(([fill, x, r]) => (
-          <circle key={x} cx={x as number} cy="60" r={r as number} fill={fill as string} />
+          <Orb
+            key={x as number}
+            cx={x as number}
+            cy={60}
+            r={r as number}
+            fill={fill as string}
+          />
         ))}
       </g>
     ),
@@ -326,7 +377,9 @@ const ART: Record<SpaceArtKind, { space?: boolean; body: React.ReactNode }> = {
       <g>
         <circle cx="34" cy="60" r="28" fill="#e0b184" />
         <path d="M8 52h52" stroke="#c99364" strokeWidth="6" />
+        <Shading cx={34} cy={60} r={28} />
         <circle cx="90" cy="60" r="20" fill="#f0d9a6" />
+        <Shading cx={90} cy={60} r={20} />
         <ellipse
           cx="90"
           cy="60"
@@ -362,6 +415,7 @@ const ART: Record<SpaceArtKind, { space?: boolean; body: React.ReactNode }> = {
 
   craters: {
     space: true,
+    zoom: 1.15,
     body: (
       <g>
         <circle cx="60" cy="66" r="34" fill="#dfe3e8" />
@@ -369,6 +423,7 @@ const ART: Record<SpaceArtKind, { space?: boolean; body: React.ReactNode }> = {
         <circle cx="46" cy="56" r="5" fill="#d5dae0" />
         <circle cx="72" cy="70" r="7" fill="#bfc6ce" />
         <circle cx="58" cy="82" r="5" fill="#bfc6ce" />
+        <Shading cx={60} cy={66} r={34} />
         <path
           d="M96 16l-16 22"
           stroke="#ff9f43"
@@ -387,6 +442,7 @@ const ART: Record<SpaceArtKind, { space?: boolean; body: React.ReactNode }> = {
         <circle cx="44" cy="60" r="26" fill="#dfe3e8" />
         <circle cx="36" cy="52" r="6" fill="#c3c9d1" />
         <circle cx="52" cy="68" r="5" fill="#c3c9d1" />
+        <Shading cx={44} cy={60} r={26} />
         <path
           d="M78 60h34"
           stroke="#ffd257"
@@ -400,8 +456,11 @@ const ART: Record<SpaceArtKind, { space?: boolean; body: React.ReactNode }> = {
           strokeLinecap="round"
           opacity="0.8"
         />
-        <text x="60" y="106" textAnchor="middle" className="space-art-label">
-          sunlight both sides
+        <text x="60" y="100" textAnchor="middle" className="space-art-label">
+          <tspan x="60">sunlight on</tspan>
+          <tspan x="60" dy="13">
+            both sides
+          </tspan>
         </text>
       </g>
     ),
@@ -433,6 +492,7 @@ const ART: Record<SpaceArtKind, { space?: boolean; body: React.ReactNode }> = {
 
   comet: {
     space: true,
+    zoom: 1.1,
     body: (
       <g>
         <path
@@ -500,6 +560,7 @@ const ART: Record<SpaceArtKind, { space?: boolean; body: React.ReactNode }> = {
 
   galaxy: {
     space: true,
+    zoom: 1.15,
     body: (
       <g>
         <ellipse cx="60" cy="60" rx="46" ry="30" fill="#2a3160" />
@@ -597,24 +658,28 @@ const ART: Record<SpaceArtKind, { space?: boolean; body: React.ReactNode }> = {
     body: (
       <g>
         <rect x="0" y="0" width="120" height="120" fill="#151a3a" />
+        {/* white sunlight goes in on the left */}
         <path
-          d="M4 34h44"
+          d="M2 52h48"
           stroke="#fffdf8"
-          strokeWidth="6"
+          strokeWidth="9"
           strokeLinecap="round"
         />
-        <path d="M48 22l26 12 -26 12Z" fill="#cdf3f7" opacity="0.9" />
+        {/* the colours fan out on the right, drawn behind the glass */}
         {['#f0544f', '#ff9f43', '#ffd257', '#63c07a', '#4aa3dd', '#845ef7'].map(
           (c, i) => (
             <path
               key={c}
-              d={`M74 34L116 ${18 + i * 14}`}
+              d={`M68 56L113 ${31 + i * 12}`}
               stroke={c}
-              strokeWidth="5"
+              strokeWidth="7"
               strokeLinecap="round"
             />
           ),
         )}
+        {/* the glass prism */}
+        <path d="M60 16l36 70H24Z" fill="#bfe9f2" opacity="0.9" />
+        <path d="M60 16L24 86h15Z" fill="#eafaff" opacity="0.9" />
       </g>
     ),
   },
@@ -644,6 +709,7 @@ const ART: Record<SpaceArtKind, { space?: boolean; body: React.ReactNode }> = {
 
   rocket: {
     space: true,
+    zoom: 1.3,
     body: (
       <g>
         <path d="M60 12c14 16 18 34 18 52H42c0-18 4-36 18-52Z" fill="#fffdf8" />
@@ -658,6 +724,7 @@ const ART: Record<SpaceArtKind, { space?: boolean; body: React.ReactNode }> = {
 
   astronaut: {
     space: true,
+    zoom: 1.25,
     body: (
       <g>
         <rect x="42" y="52" width="36" height="42" rx="12" fill="#fffdf8" />
@@ -690,6 +757,7 @@ const ART: Record<SpaceArtKind, { space?: boolean; body: React.ReactNode }> = {
 
   telescope: {
     space: true,
+    zoom: 1.15,
     body: (
       <g>
         <rect
@@ -715,18 +783,45 @@ export function SpaceArt({ kind, className }: Props) {
   const art = ART[kind]
   return (
     <svg
-      className={`space-art${className ? ` ${className}` : ''}`}
+      className={`space-art${art.bare ? ' space-art-bare' : ''}${
+        className ? ` ${className}` : ''
+      }`}
       viewBox="0 0 120 120"
       aria-hidden="true"
       focusable="false"
     >
+      <defs>
+        <radialGradient id="art-lit" cx="34%" cy="30%" r="70%">
+          <stop offset="0%" stopColor="#ffffff" stopOpacity="0.45" />
+          <stop offset="55%" stopColor="#ffffff" stopOpacity="0.06" />
+          <stop offset="100%" stopColor="#ffffff" stopOpacity="0" />
+        </radialGradient>
+        <radialGradient id="art-shade" cx="76%" cy="78%" r="72%">
+          <stop offset="0%" stopColor="#0b1030" stopOpacity="0.4" />
+          <stop offset="60%" stopColor="#0b1030" stopOpacity="0.1" />
+          <stop offset="100%" stopColor="#0b1030" stopOpacity="0" />
+        </radialGradient>
+        <radialGradient id="art-glow">
+          <stop offset="0%" stopColor="#ffd257" stopOpacity="0.55" />
+          <stop offset="60%" stopColor="#ffd257" stopOpacity="0.16" />
+          <stop offset="100%" stopColor="#ffd257" stopOpacity="0" />
+        </radialGradient>
+      </defs>
       {art.space ? (
         <>
           <rect x="0" y="0" width="120" height="120" fill={SPACE} />
           <Stars seed={kind.length} />
         </>
       ) : null}
-      {art.body}
+      {art.zoom ? (
+        <g
+          transform={`translate(60 60) scale(${art.zoom}) translate(-60 -60)`}
+        >
+          {art.body}
+        </g>
+      ) : (
+        art.body
+      )}
     </svg>
   )
 }

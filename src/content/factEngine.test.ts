@@ -75,4 +75,34 @@ describe('fact engine', () => {
     )
     expect(card).toBeNull()
   })
+
+  describe('photos', () => {
+    const summary = 'An aurora is a natural light display in the sky.'
+    const cardWith = (thumb?: {
+      source?: string
+      width?: number
+      height?: number
+    }) => toKidCard({ title: 'Aurora', page: 'Aurora' }, summary, thumb)
+
+    it('keeps a roughly square or landscape picture', () => {
+      const card = cardWith({ source: 'a.jpg', width: 330, height: 337 })
+      expect(card!.photo).toBe('a.jpg')
+    })
+
+    it('drops a tall portrait that would crop to nonsense', () => {
+      const card = cardWith({ source: 'tall.jpg', width: 200, height: 600 })
+      expect(card!.photo).toBeUndefined()
+    })
+
+    it('drops a wide banner and falls back to the drawing', () => {
+      const card = cardWith({ source: 'wide.jpg', width: 900, height: 200 })
+      expect(card!.photo).toBeUndefined()
+      expect(card!.art).toBe('blue-sky')
+    })
+
+    it('copes with no picture at all', () => {
+      expect(cardWith()!.photo).toBeUndefined()
+      expect(cardWith({ source: 'x.jpg' })!.photo).toBeUndefined()
+    })
+  })
 })

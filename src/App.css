@@ -1396,11 +1396,17 @@
   aspect-ratio: 1 / 1;
   border-radius: 16px;
   overflow: hidden;
+  filter: drop-shadow(0 3px 7px rgba(21, 26, 58, 0.3));
+}
+
+/* art with no background box: the shadow would outline the drawing itself */
+.space-art-bare {
+  filter: none;
 }
 
 .space-art-label {
   font-family: Nunito, sans-serif;
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 800;
   fill: #e7ecff;
 }
@@ -1481,6 +1487,22 @@
 .learn-art {
   width: min(260px, 100%);
   margin: 0 auto 0.75rem;
+}
+
+.learn-photo {
+  display: block;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
+  border-radius: 16px;
+  background: #151a3a;
+  box-shadow: 0 3px 7px rgba(21, 26, 58, 0.3);
+}
+
+.learn-credit {
+  margin: 0.6rem 0 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  opacity: 0.5;
 }
 
 .learn-title {

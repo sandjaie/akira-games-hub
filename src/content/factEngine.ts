@@ -135,18 +135,35 @@ export function artForText(text: string, hint?: SpaceArtKind): SpaceArtKind {
 
 export type Topic = { title: string; page: string; art?: SpaceArtKind }
 
+/**
+ * Only landscape-ish photos: the card slot is a square, and Wikipedia leads
+ * plenty of pages with a tall portrait or a logo that crops to nonsense.
+ */
+function usablePhoto(thumb?: WikiThumb): string | undefined {
+  if (!thumb?.source || !thumb.width || !thumb.height) return undefined
+  const ratio = thumb.width / thumb.height
+  return ratio >= 0.8 && ratio <= 2.2 ? thumb.source : undefined
+}
+
 /** Build a card from a summary: at most two readable sentences. */
-export function toKidCard(topic: Topic, extract: string): LearnCard | null {
+export function toKidCard(
+  topic: Topic,
+  extract: string,
+  thumb?: WikiThumb,
+): LearnCard | null {
   const usable = splitSentences(extract).filter(isKidReadable).slice(0, 2)
   if (usable.length === 0) return null
   return {
     art: artForText(`${topic.page} ${usable.join(' ')}`, topic.art),
     title: topic.title,
     lines: usable,
+    photo: usablePhoto(thumb),
   }
 }
 
-type WikiSummary = { extract?: string }
+export type WikiThumb = { source?: string; width?: number; height?: number }
+
+type WikiSummary = { extract?: string; thumbnail?: WikiThumb }
 
 export async function fetchTopicCard(topic: Topic): Promise<LearnCard | null> {
   try {
@@ -155,7 +172,7 @@ export async function fetchTopicCard(topic: Topic): Promise<LearnCard | null> {
     })
     if (!res.ok) return null
     const data = (await res.json()) as WikiSummary
-    return data.extract ? toKidCard(topic, data.extract) : null
+    return data.extract ? toKidCard(topic, data.extract, data.thumbnail) : null
   } catch {
     return null
   }
