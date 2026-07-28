@@ -9,9 +9,11 @@ import {
   recordJumbledRound,
   recordMissionLearned,
   recordMissionQuiz,
+  recordChapterRead,
   saveProgress,
 } from './progress/progress'
 import { loadPlayerName, savePlayerName } from './content/explorer'
+import { getChapter } from './content/thirukkural'
 import { Celebration } from './screens/Celebration'
 import { CountriesDifficulty } from './screens/CountriesDifficulty'
 import { CountriesMode } from './screens/CountriesMode'
@@ -28,6 +30,10 @@ import { SpaceMode } from './screens/SpaceMode'
 import { SpacePlay } from './screens/SpacePlay'
 import { SpaceResults } from './screens/SpaceResults'
 import { StationScene } from './screens/StationScene'
+import { TamizhHome } from './screens/TamizhHome'
+import { ThirukkuralChapters } from './screens/ThirukkuralChapters'
+import { ThirukkuralPaals } from './screens/ThirukkuralPaals'
+import { ThirukkuralRead } from './screens/ThirukkuralRead'
 import { Welcome } from './screens/Welcome'
 import { WordsLevelClear } from './screens/WordsLevelClear'
 import { WordsLevelMap } from './screens/WordsLevelMap'
@@ -57,6 +63,7 @@ export default function App() {
         onJumbled={() => setScreen({ name: 'jumbled-difficulty' })}
         onCountries={() => setScreen({ name: 'countries-mode' })}
         onSpace={() => setScreen({ name: 'space-mode' })}
+        onTamizh={() => setScreen({ name: 'tamizh-home' })}
       />
     )
   }
@@ -334,6 +341,58 @@ export default function App() {
         }
         onMissions={() => setScreen({ name: 'space-missions', mode: 'quiz' })}
         onHub={() => setScreen({ name: 'welcome' })}
+      />
+    )
+  }
+
+  if (screen.name === 'tamizh-home') {
+    return (
+      <TamizhHome
+        onBack={() => setScreen({ name: 'welcome' })}
+        onThirukkural={() => setScreen({ name: 'thirukkural-paals' })}
+      />
+    )
+  }
+
+  if (screen.name === 'thirukkural-paals') {
+    return (
+      <ThirukkuralPaals
+        onBack={() => setScreen({ name: 'tamizh-home' })}
+        onPick={(paalId) => setScreen({ name: 'thirukkural-chapters', paalId })}
+      />
+    )
+  }
+
+  if (screen.name === 'thirukkural-chapters') {
+    return (
+      <ThirukkuralChapters
+        paalId={screen.paalId}
+        tamizh={progress.tamizh}
+        onBack={() => setScreen({ name: 'thirukkural-paals' })}
+        onPick={(chapterId) =>
+          setScreen({ name: 'thirukkural-read', chapterId })
+        }
+      />
+    )
+  }
+
+  if (screen.name === 'thirukkural-read') {
+    return (
+      <ThirukkuralRead
+        chapterId={screen.chapterId}
+        startIndex={screen.index}
+        onBack={() =>
+          setScreen({
+            name: 'thirukkural-chapters',
+            paalId: getChapter(screen.chapterId).paalId,
+          })
+        }
+        onChapterRead={() =>
+          setProgress((p) => ({
+            ...p,
+            tamizh: recordChapterRead(p.tamizh, screen.chapterId),
+          }))
+        }
       />
     )
   }
