@@ -166,86 +166,107 @@ const PAAL = {
   Love: { id: 'inbam', nameTa: 'இன்பத்துப்பால்', nameEn: 'Caring hearts', emoji: '💛' },
 }
 
+/**
+ * Chapters left out for ages 5–10.
+ * - 15: not coveting another’s wife
+ * - 91–92: romantic entanglement / வரைவின் மகளிர்
+ * - 109–133: entire காமத்துப்பால் (Kaamathupaal / Inbam)
+ */
+const EXCLUDED_CHAPTER_IDS = new Set([
+  15,
+  91,
+  92,
+  ...Array.from({ length: 25 }, (_, i) => 109 + i),
+])
+
+
+/** Whole-word English swaps — never match inside a longer word. */
+function wb(pattern, flags = 'gi') {
+  return new RegExp(`\\b(?:${pattern})\\b`, flags)
+}
+
 const EN_SWAPS = [
-  [/the eternal God/gi, 'God'],
-  [/Eternal God/gi, 'God'],
-  [/ambrosia/gi, 'sweet magic water'],
-  [/ascetics?/gi, 'people who live simply'],
-  [/ministers? of state/gi, 'helpers of a leader'],
-  [/ministers?/gi, 'helpers'],
-  [/sovereign/gi, 'leader'],
-  [/monarch/gi, 'leader'],
-  [/Indra/gi, 'a great sky leader'],
-  [/king(s)?/gi, 'leader$1'],
-  [/queen(s)?/gi, 'leader$1'],
-  [/virtue/gi, 'goodness'],
-  [/virtuous/gi, 'good'],
-  [/vice/gi, 'wrong'],
-  [/wickedness/gi, 'being mean'],
-  [/wicked/gi, 'mean'],
-  [/enmity/gi, 'fighting'],
-  [/enemies/gi, 'people who fight you'],
-  [/enemy/gi, 'someone who fights you'],
-  [/prosperity/gi, 'doing well'],
-  [/affliction/gi, 'hard times'],
-  [/calamity/gi, 'big trouble'],
-  [/destitution/gi, 'having nothing'],
-  [/penury/gi, 'being very poor'],
-  [/avarice/gi, 'wanting too much'],
-  [/covet(ing|ousness)?/gi, 'wanting what others have'],
-  [/backbiting/gi, 'talking badly about someone'],
-  [/slander/gi, 'mean talk'],
-  [/forbearance/gi, 'patience'],
-  [/decorum/gi, 'good manners'],
-  [/impartiality/gi, 'being fair'],
-  [/benevolence/gi, 'kindness'],
-  [/liberality/gi, 'sharing'],
-  [/renown/gi, 'a good name'],
-  [/fame/gi, 'a good name'],
-  [/domestic life/gi, 'family life'],
-  [/conjugal/gi, 'family'],
-  [/spouse/gi, 'partner'],
-  [/wife/gi, 'partner'],
-  [/husband/gi, 'partner'],
-  [/sexual pleasure/gi, 'wanting only fun'],
-  [/sexual/gi, 'grown-up'],
-  [/embrace/gi, 'warm hug'],
-  [/lovers'?/gi, 'people who care for each other'],
-  [/lover/gi, 'someone you care about'],
-  [/love's/gi, "caring's"],
-  [/\blove\b/gi, 'caring'],
-  [/passion/gi, 'strong feelings'],
-  [/desire/gi, 'wanting'],
-  [/lust/gi, 'greedy wanting'],
-  [/pouting/gi, 'a little sulk'],
-  [/bouderie/gi, 'a little sulk'],
-  [/celestial/gi, 'someone magical'],
-  [/princess/gi, 'kind person'],
+  [wb('the eternal God'), 'God'],
+  [wb('Eternal God'), 'God'],
+  [wb('ambrosia'), 'sweet magic water'],
+  [wb('ascetics?'), 'people who live simply'],
+  [wb('ministers? of state'), 'helpers of a leader'],
+  [wb('ministers?'), 'helpers'],
+  [wb('sovereigns?'), 'leader'],
+  [wb('monarchs?'), 'leader'],
+  [wb('Indra'), 'a great sky leader'],
+  [wb('kings'), 'leaders'],
+  [wb('king'), 'leader'],
+  [wb('queens'), 'leaders'],
+  [wb('queen'), 'leader'],
+  [wb('virtues'), 'good qualities'],
+  [wb('virtue'), 'goodness'],
+  [wb('virtuous'), 'good'],
+  [wb('vices?'), 'wrong'],
+  [wb('wickedness'), 'being mean'],
+  [wb('wicked'), 'mean'],
+  [wb('enmity'), 'fighting'],
+  [wb('enemies'), 'people who fight you'],
+  [wb('enemy'), 'someone who fights you'],
+  [wb('prosperity'), 'doing well'],
+  [wb('affliction'), 'hard times'],
+  [wb('calamity'), 'big trouble'],
+  [wb('destitution'), 'having nothing'],
+  [wb('penury'), 'being very poor'],
+  [wb('avarice'), 'wanting too much'],
+  [wb('coveting|covetousness|covet'), 'wanting what others have'],
+  [wb('backbiting'), 'talking badly about someone'],
+  [wb('slander'), 'mean talk'],
+  [wb('forbearance'), 'patience'],
+  [wb('decorum'), 'good manners'],
+  [wb('impartiality'), 'being fair'],
+  [wb('benevolence'), 'kindness'],
+  [wb('liberality'), 'sharing'],
+  [wb('renown'), 'a good name'],
+  [wb('fame'), 'a good name'],
+  [wb('domestic life'), 'family life'],
+  [wb('conjugal'), 'family'],
+  [wb('spouses?'), 'partner'],
+  [wb('wives|wife'), 'partner'],
+  [wb('husbands?'), 'partner'],
+  [wb('sexual pleasure'), 'wanting only fun'],
+  [wb('sexual'), 'grown-up'],
+  [wb('embraces?'), 'warm hug'],
+  [/\blovers'?\b/gi, 'people who care for each other'],
+  [wb('lover'), 'someone you care about'],
+  [/\blove's\b/gi, "caring's"],
+  [wb('love'), 'caring'],
+  [wb('passion'), 'strong feelings'],
+  [wb('desires?'), 'wanting'],
+  [wb('lust'), 'greedy wanting'],
+  [wb('pouting'), 'a little sulk'],
+  [wb('bouderie'), 'a little sulk'],
+  [wb('celestial'), 'someone magical'],
+  [wb('princess(?:es)?'), 'kind person'],
   [/beauty of the/gi, 'kindness of the'],
-  [/perplexed/gi, 'confused'],
-  [/penance/gi, 'hard good practice'],
-  [/alms-?deeds?/gi, 'sharing with others'],
-  [/treatise/gi, 'wise book'],
-  [/extol/gi, 'praise'],
-  [/flourish/gi, 'do well'],
-  [/prosper/gi, 'do well'],
+  [wb('perplexed'), 'confused'],
+  [wb('penance'), 'hard good practice'],
+  [wb('alms-?deeds?'), 'sharing with others'],
+  [wb('treatise'), 'wise book'],
+  [wb('extol'), 'praise'],
+  [wb('flourish'), 'do well'],
+  [wb('prosper'), 'do well'],
   [/abide in/gi, 'follow'],
-  [/faultless/gi, 'good'],
-  [/wantings?/gi, 'wants'],
-  [/senses/gi, 'senses'],
+  [wb('faultless'), 'good'],
+  [wb('wantings?'), 'wants'],
   [/anxiety of mind/gi, 'worry'],
-  [/anxiety/gi, 'worry'],
-  [/incomparable/gi, 'one-of-a-kind'],
+  [wb('anxiety'), 'worry'],
+  [wb('incomparable'), 'one-of-a-kind'],
   [/two-fold deeds/gi, 'good and bad actions'],
   [/two-fold/gi, 'two kinds of'],
   [/adhere to/gi, 'stick to'],
   [/delight in/gi, 'love'],
-  [/shew/gi, 'show'],
+  [wb('shew'), 'show'],
   [/profit have those derived from learning/gi, 'good is learning'],
   [/what profit/gi, 'what good'],
   [/derived from/gi, 'from'],
   [/worship not/gi, 'do not thank'],
-  [/united to the (glorious )?feet of/gi, 'close to'],
+  [/united to the (?:glorious )?feet of/gi, 'close to'],
   [/meditate the feet of/gi, 'think kindly of'],
   [/void of wanting or aversion/gi, 'does not grab or push away'],
   [/evil shall never come/gi, 'trouble stays away'],
@@ -256,28 +277,28 @@ const EN_SWAPS = [
   [/feet of God/gi, 'way of God'],
   [/Him who/gi, 'God who'],
   [/\bHim\b/g, 'God'],
-  [/Anthanar/gi, 'kind wise people'],
+  [wb('Anthanar'), 'kind wise people'],
   [/viz[.,-]/gi, 'that is,'],
   [/i\.e\./gi, 'that means'],
-  [/viz\b/gi, 'that is'],
-  [/\bthus\b/gi, 'so'],
-  [/\bhence\b/gi, 'so'],
-  [/\btherefore\b/gi, 'so'],
-  [/\bthereof\b/gi, 'of it'],
-  [/\bwherein\b/gi, 'where'],
-  [/\bunto\b/gi, 'to'],
-  [/\bdoth\b/gi, 'does'],
-  [/\bhath\b/gi, 'has'],
-  [/\bthou\b/gi, 'you'],
-  [/\bthy\b/gi, 'your'],
-  [/\bthee\b/gi, 'you'],
-  [/\bye\b/gi, 'you'],
+  [wb('viz'), 'that is'],
+  [wb('thus'), 'so'],
+  [wb('hence'), 'so'],
+  [wb('therefore'), 'so'],
+  [wb('thereof'), 'of it'],
+  [wb('wherein'), 'where'],
+  [wb('unto'), 'to'],
+  [wb('doth'), 'does'],
+  [wb('hath'), 'has'],
+  [wb('thou'), 'you'],
+  [wb('thy'), 'your'],
+  [wb('thee'), 'you'],
+  [wb('ye'), 'you'],
   [/let a man/gi, 'a person should'],
   [/a man who/gi, 'someone who'],
-  [/a man\b/gi, 'a person'],
-  [/men who/gi, 'people who'],
-  [/\bmen\b/gi, 'people'],
-  [/mankind/gi, 'people'],
+  [/\ba man\b/gi, 'a person'],
+  [/\bmen who\b/gi, 'people who'],
+  [wb('men'), 'people'],
+  [wb('mankind'), 'people'],
   [/the world of the gods/gi, 'a wonderful place'],
   [/heaven and earth/gi, 'the whole wide world'],
   [/sea-girt spacious world/gi, 'big wide world'],
@@ -285,12 +306,12 @@ const EN_SWAPS = [
   [/spacious heaven/gi, 'wide sky'],
   [/withholding rain/gi, 'holding back rain'],
   [/deceive \(our hopes\)/gi, 'does not come'],
-  [/deceive/gi, 'trick'],
+  [wb('deceive'), 'trick'],
   [/labour of the plough/gi, 'farm work'],
   [/must cease/gi, 'has to stop'],
   [/imparting rain/gi, 'helpful rain'],
   [/abundance of wealth/gi, 'lots of good things'],
-  [/diminish/gi, 'get smaller'],
+  [wb('diminish'), 'get smaller'],
   [/green blade of grass/gi, 'tiny green grass'],
   [/yearly festivals/gi, 'fun yearly parties'],
   [/daily worship/gi, 'daily thanks'],
@@ -334,25 +355,147 @@ const TA_CLEAN = [
   [/\s+/g, ' '],
 ]
 
+/** Age-safe Tamil replacements for every book (not only Book III). */
+const TA_SAFE = [
+  [/பாலியல்\s*தொழிலாளர்[^\s,]*/gu, 'நம்ப முடியாதவர்'],
+  [/விலைமகளிர்[^\s,]*/gu, 'நம்ப முடியாதவர்'],
+  [/விலைமகள்[^\s,]*/gu, 'நம்ப முடியாதவர்'],
+  [/பரத்தையர்[^\s,]*/gu, 'நம்ப முடியாதவர்'],
+  [/பரத்தை[^\s,]*/gu, 'நம்ப முடியாதவர்'],
+  [/மார்பகம்[^\s,]*/gu, 'அடையாளம்'],
+  [/மார்பை[^\s,]*/gu, 'உடலை'],
+  [/கற்புநெறி[^\s,]*/gu, 'நல்லொழுக்கம்'],
+  [/கற்பு[^\s,]*/gu, 'நல்லொழுக்கம்'],
+  [/புணர்ச்சி/g, 'அன்புடன் சேர்தல்'],
+  [/புணரும்/g, 'அன்புடன் சேரும்'],
+  [/புணர்/g, 'சேர்'],
+  [/காதல் நுகர்ச்சி/g, 'அன்பு உணர்வு'],
+  [/காதல் இன்பம்/g, 'அன்பு மகிழ்ச்சி'],
+  [/காமத்/g, 'அன்பி'],
+  [/காமம்/g, 'அன்பு'],
+  [/காதல்/g, 'அன்பு'],
+  [/தழுவுதல்/g, 'அன்புடன் சேர்தல்'],
+  [/தழுவி/g, 'அன்புடன் சேர்ந்து'],
+  [/முயக்கம்/g, 'அன்பான சேர்க்கை'],
+  [/முயங்க/g, 'அன்புடன் சேர'],
+]
+
+/** Age-safe English replacements for every book. */
+const EN_SAFE = [
+  [wb('prostitutes?'), 'fake friends'],
+  [wb('prostitution'), 'a bad path'],
+  [wb('harlots?'), 'fake friends'],
+  [wb('courtesans?'), 'fake friends'],
+  [wb('wanton women'), 'people on a bad path'],
+  [wb('wanton'), 'untrustworthy'],
+  [wb('concubines?'), 'fake friends'],
+  [wb('adultery'), 'breaking a promise'],
+  [wb('adulterous'), 'unfaithful'],
+  [wb('adulterers?'), 'someone unfaithful'],
+  [wb('chastity'), 'loyalty'],
+  [wb('breasts?'), 'a mark of strength'],
+  [wb('sexual(?:ly)?'), 'grown-up'],
+  [wb('sex'), 'grown-up stuff'],
+  [wb('girlfriends?'), 'friends'],
+  [wb('boyfriends?'), 'friends'],
+  [wb('kisses|kissing|kiss'), 'kind hello'],
+  [wb('nuptial'), 'together'],
+  [wb('marital'), 'together'],
+  [wb('jewelled female'), 'wonderful person'],
+  [wb('female'), 'person'],
+  [wb('peahen'), 'pretty peacock'],
+  [wb('someone magical'), 'magical friend'],
+  [wb('hearty warm hug'), 'kind warm hug'],
+]
+
 function cleanTamil(raw) {
   let s = String(raw || '').trim()
   for (const [re, to] of TA_CLEAN) s = s.replace(re, to)
   s = s.replace(/\s+/g, ' ').trim()
-  // Prefer a single clear sentence for small kids.
-  if (s.length > 120) {
-    const cut = s.slice(0, 120)
-    const soft = Math.max(
-      cut.lastIndexOf('.'),
-      cut.lastIndexOf('!'),
-      cut.lastIndexOf('?'),
-      cut.lastIndexOf(','),
-      cut.lastIndexOf(' '),
-    )
-    if (soft > 50) s = cut.slice(0, soft).trim()
-    else s = cut.trim()
-  }
+  s = shortenToSentence(s, 120)
   if (s && !/[.!?]$/.test(s)) s += '.'
   return s
+}
+
+/**
+ * Prefer a finished sentence. Always retreat to a word boundary — never keep
+ * a raw character slice (that produced endings like "goo." / "வேண.").
+ */
+function looksDangling(s) {
+  return /(?:,|;|:)?\s*\b(?:who|and|or|the|a|an|to|of|for|with|by|from|in|on|at|as|is|are|was|were|that|which|their|his|her|its|those|these|them)\.?$/i.test(
+    s.trim(),
+  )
+}
+
+function atWordBoundary(cut) {
+  const trimmed = cut.replace(/\s+/g, ' ').trim()
+  if (!trimmed) return null
+  // If the slice already ends on a full token (no partial word at the limit),
+  // keep it; otherwise drop the incomplete trailing token.
+  const lastSpace = trimmed.lastIndexOf(' ')
+  if (lastSpace <= 40) return null
+  return trimmed.slice(0, lastSpace).trim()
+}
+
+function stripTrailingGlue(text) {
+  let soft = text.replace(/\s+/g, ' ').trim()
+  for (let i = 0; i < 10; i++) {
+    const next = soft
+      .replace(/[,:;.\-–—]+$/g, '')
+      .replace(
+        /\b(?:and|or|the|a|an|to|of|for|with|by|from|in|on|at|as|who|which|that|their|his|her|its|is|are|was|were|those|these|them)\s*$/i,
+        '',
+      )
+      .trim()
+    if (next === soft) break
+    soft = next
+  }
+  return soft
+}
+
+function shortenToSentence(s, maxLen, fallback) {
+  if (!s || s.length <= maxLen) return s
+
+  const tryCut = (source) => {
+    const cut = source.slice(0, maxLen)
+    const ends = ['. ', '! ', '? '].map((m) => cut.lastIndexOf(m))
+    const sentenceEnd = Math.max(...ends)
+    if (sentenceEnd > 40) return cut.slice(0, sentenceEnd + 1).trim()
+
+    const semi = cut.lastIndexOf('; ')
+    if (semi > 40) {
+      const piece = stripTrailingGlue(cut.slice(0, semi))
+      if (piece.length > 40 && !looksDangling(piece)) return `${piece}.`
+    }
+
+    // Always cut on a space — never accept the raw character slice.
+    const bounded = atWordBoundary(cut)
+    if (!bounded) return null
+    const soft = stripTrailingGlue(bounded)
+    if (soft.length > 40) return soft
+    return null
+  }
+
+  const fromPrimary = tryCut(s)
+  if (fromPrimary) return fromPrimary
+
+  if (fallback && fallback !== s) {
+    if (fallback.length <= maxLen) {
+      const whole = stripTrailingGlue(fallback.replace(/[.!?]+$/, ''))
+      if (whole.length > 20 && !looksDangling(whole)) {
+        return /[.!?]$/.test(fallback) ? fallback.trim() : `${whole}.`
+      }
+    }
+    const fromFallback = tryCut(fallback)
+    if (fromFallback) return fromFallback
+  }
+
+  // Last resort: shorter window, still word-bounded.
+  const shortWindow = tryCut(s.slice(0, Math.min(maxLen, 100)))
+  if (shortWindow) return shortWindow
+  const words = s.split(/\s+/).filter(Boolean)
+  const take = Math.max(8, Math.min(words.length, 14))
+  return words.slice(0, take).join(' ')
 }
 
 function pickTamilMeaning(k, number) {
@@ -365,34 +508,19 @@ function pickTamilMeaning(k, number) {
       : 'இந்த குறள் நல்ல வாழ்க்கைக்கு வழி காட்டுகிறது.'
   }
   candidates.sort((a, b) => a.length - b.length)
-  let s = candidates[0]
-  if (number >= 1081) s = softenTamilLove(s)
-  return s
+  return ageSafeTamil(candidates[0])
 }
 
-function softenTamilLove(s) {
-  return s
-    .replace(/காதல் நுகர்ச்சி/g, 'அன்பு உணர்வு')
-    .replace(/காதல் இன்பம்/g, 'அன்பு மகிழ்ச்சி')
-    .replace(/காமத்/g, 'அன்பி')
-    .replace(/காமம்/g, 'அன்பு')
-    .replace(/காதல்/g, 'அன்பு')
-    .replace(/தழுவுதல்/g, 'அன்புடன் சேர்தல்')
-    .replace(/தழுவி/g, 'அன்புடன் சேர்ந்து')
-    .replace(/முயக்கம்/g, 'அன்பான சேர்க்கை')
-    .replace(/முயங்க/g, 'அன்புடன் சேர')
-    .replace(/மங்கை/g, 'அன்புக்குரியவர்')
-    .replace(/பெண்/g, 'அன்புக்குரியவர்')
-    .replace(/ஆடவர்/g, 'அன்புக்குரியவர்')
+function ageSafeTamil(s) {
+  let out = s
+  for (const [re, to] of TA_SAFE) out = out.replace(re, to)
+  return out
 }
 
-function softenEnglishLove(s) {
-  return s
-    .replace(/\bjewelled female\b/gi, 'wonderful person')
-    .replace(/\bfemale\b/gi, 'person')
-    .replace(/\bpeahen\b/gi, 'pretty peacock')
-    .replace(/\bsomeone magical\b/gi, 'magical friend')
-    .replace(/\bhearty warm hug\b/gi, 'kind warm hug')
+function ageSafeEnglish(s) {
+  let out = s
+  for (const [re, to] of EN_SAFE) out = out.replace(re, to)
+  return out
     .replace(/\bdislike adds delight to caring\b/gi, 'a little sulk can make caring feel sweeter')
     .replace(/\badd delight to dislike\b/gi, 'make making-up feel joyful')
     .replace(/\bcaring; and a\b/gi, 'caring, and a')
@@ -404,33 +532,24 @@ function stillArchaic(s) {
   )
 }
 
+function applySwaps(text) {
+  let s = text
+  for (const [re, to] of EN_SWAPS) s = s.replace(re, to)
+  return s.replace(/\s+/g, ' ').trim()
+}
+
 function kidEnglish(explanation, translation, number) {
+  void number
   let s = String(explanation || translation || '').trim()
   s = s.replace(/^\([^)]*\)\s*/g, '')
-  for (const [re, to] of EN_SWAPS) s = s.replace(re, to)
-  s = s.replace(/\s+/g, ' ').trim()
-
-  if (number >= 1081) {
-    s = s
-      .replace(/\bgirlfriend\b/gi, 'friend')
-      .replace(/\bboyfriend\b/gi, 'friend')
-      .replace(/\bwife\b/gi, 'dear one')
-      .replace(/\bhusband\b/gi, 'dear one')
-      .replace(/\bkiss(es|ing)?\b/gi, 'kind hello')
-      .replace(/\bbed\b/gi, 'home')
-      .replace(/\bsex(ual)?\b/gi, 'grown-up')
-      .replace(/\bnuptial\b/gi, 'together')
-      .replace(/\bmarital\b/gi, 'together')
-      .replace(/\bmarriage\b/gi, 'being together')
-    s = softenEnglishLove(s)
-  }
+  s = applySwaps(s)
+  s = ageSafeEnglish(s)
 
   // If classic English still shows through, fall back to the short couplet translation.
-  if (stillArchaic(s) && translation) {
-    let t = String(translation).trim()
-    for (const [re, to] of EN_SWAPS) t = t.replace(re, to)
-    t = t.replace(/\s+/g, ' ').trim()
-    if (t && !stillArchaic(t)) s = t
+  let fallback = ''
+  if (translation) {
+    fallback = ageSafeEnglish(applySwaps(String(translation).trim()))
+    if (stillArchaic(s) && fallback && !stillArchaic(fallback)) s = fallback
   }
 
   // Soften leftover archaic helpers.
@@ -445,19 +564,41 @@ function kidEnglish(explanation, translation, number) {
     .trim()
 
   if (s && !/^[A-Z]/.test(s)) s = s.charAt(0).toUpperCase() + s.slice(1)
-  if (s.length > 150) {
-    const cut = s.slice(0, 150)
-    const soft = Math.max(
-      cut.lastIndexOf('. '),
-      cut.lastIndexOf('; '),
-      cut.lastIndexOf(', '),
-      cut.lastIndexOf(' '),
-    )
-    s = (soft > 60 ? cut.slice(0, soft) : cut).trim()
+  s = shortenToSentence(s, 150, fallback)
+  return finishMeaning(s, fallback)
+}
+
+function finishMeaning(s, fallback) {
+  let out = String(s || '')
+    .replace(/[;:]+$/g, '')
+    .trim()
+  if (out && !/[.!?]$/.test(out)) out += '.'
+
+  const core = out.replace(/[.!?]+$/, '')
+  if (!looksDangling(core)) return ageSafeEnglish(out)
+
+  if (fallback) {
+    let f = String(fallback)
+      .replace(/[;:]+$/g, '')
+      .trim()
+    if (f && !/[.!?]$/.test(f)) f += '.'
+    if (!looksDangling(f.replace(/[.!?]+$/, ''))) return ageSafeEnglish(f)
   }
-  s = s.replace(/[;:]+$/g, '').trim()
-  if (s && !/[.!?]$/.test(s)) s += '.'
-  return s
+
+  let stripped = core
+  for (let i = 0; i < 10; i++) {
+    const next = stripped
+      .replace(/[,:;.\-–—]+$/g, '')
+      .replace(
+        /\b(?:and|or|the|a|an|to|of|for|with|by|from|in|on|at|as|who|which|that|their|his|her|its|is|are|was|were|those|these|them)\s*$/i,
+        '',
+      )
+      .trim()
+    if (next === stripped) break
+    stripped = next
+  }
+  if (stripped.length > 30) return ageSafeEnglish(`${stripped}.`)
+  return ageSafeEnglish(out)
 }
 
 /**
@@ -551,15 +692,31 @@ const HAND_TUNED = {
     meaningTa:
       'நாம் உதவி செய்யாதபோதும் ஒருவர் நமக்கு உதவினால், அந்த உதவி உலகை விட பெரியது.',
   },
+  402: {
+    meaningEn:
+      'Wanting to hear an unlearned person speak in a wise gathering is like hoping for something that cannot happen.',
+    meaningTa:
+      'கல்லாதவர் சொல்வதைக் கேட்க விரும்புவது, நடக்காத ஒன்றை எதிர்பார்ப்பது போன்றது.',
+  },
+  813: {
+    meaningEn:
+      'Friends who only want gain, fake friends who only want gifts, and thieves are all the same kind of people.',
+    meaningTa:
+      'பயனை மட்டும் எண்ணி நட்பு கொள்பவர், நம்ப முடியாதவர், கள்வர் ஆகிய மூவரும் ஒரே மாதிரி.',
+  },
 }
 
 function flattenChapters(detail) {
   const out = []
+  if (CHAPTER_EN.length !== 133) throw new Error(`CHAPTER_EN length ${CHAPTER_EN.length}`)
   for (const sec of detail[0].section.detail) {
+    // Drop entire காமத்துப்பால் (Love / Kaamathupaal) for kids.
+    if (sec.translation === 'Love') continue
     const paal = PAAL[sec.translation]
     if (!paal) throw new Error(`unknown paal ${sec.translation}`)
     for (const cg of sec.chapterGroup.detail) {
       for (const ch of cg.chapters.detail) {
+        if (EXCLUDED_CHAPTER_IDS.has(ch.number)) continue
         out.push({
           id: ch.number,
           paalId: paal.id,
@@ -571,13 +728,65 @@ function flattenChapters(detail) {
       }
     }
   }
-  if (out.length !== 133) throw new Error(`expected 133 chapters, got ${out.length}`)
-  if (CHAPTER_EN.length !== 133) throw new Error(`CHAPTER_EN length ${CHAPTER_EN.length}`)
+  const expected = 133 - EXCLUDED_CHAPTER_IDS.size
+  if (out.length !== expected) {
+    throw new Error(`expected ${expected} kid chapters, got ${out.length}`)
+  }
   return out
 }
 
 function tsString(s) {
   return JSON.stringify(s)
+}
+
+const FORBIDDEN_EN = [
+  /\bleaderdom\b/i,
+  /\bgoodnesss\b/i,
+  /\bwopeople\b/i,
+  /\bprostitut/i,
+  /\bharlot/i,
+  /\bcourtesan/i,
+  /\bwanton\b/i,
+  /\bconcubine/i,
+  /\badulter/i,
+  /\bsexual\b/i,
+  /\blovers?\b/i,
+  /\bembrace\b/i,
+  // Mid-clause cuts: "good persons, and." / "savages who."
+  /,\s*(?:and|or|who|the|a|an|to|of)\.$/i,
+  /\b(?:people who fight you|murderous savages)\s+who\.$/i,
+  /\bwho\.$/i,
+  // Character-slice stubs: space + lone letter + period (e.g. "who h.")
+  // Avoid matching the "t." in "can't."
+  /\s[b-hj-zB-HJ-Z]\.$/,
+  /\bgoo\.$/i,
+]
+
+const FORBIDDEN_TA = [
+  /பாலியல்/,
+  /விலைமகள்/,
+  /பரத்தை/,
+  /புணர்ச்சி/,
+  /காமம்/,
+  /காதல் நுகர்ச்சி/,
+  /மார்பகம்/,
+  // Mid-word Tamil stubs: "வேண." from வேண்டும்
+  /\sவேண\.$/,
+]
+
+function assertKidSafe(kurals) {
+  const fails = []
+  for (const k of kurals) {
+    for (const re of FORBIDDEN_EN) {
+      if (re.test(k.meaningEn)) fails.push(`#${k.number} EN ${re}: ${k.meaningEn}`)
+    }
+    for (const re of FORBIDDEN_TA) {
+      if (re.test(k.meaningTa)) fails.push(`#${k.number} TA ${re}: ${k.meaningTa}`)
+    }
+  }
+  if (fails.length) {
+    throw new Error(`kid-safety check failed:\n${fails.slice(0, 30).join('\n')}`)
+  }
 }
 
 async function main() {
@@ -593,28 +802,40 @@ async function main() {
   }
 
   const chapters = flattenChapters(detailJson)
-  const kurals = raw.map((k) => {
-    const number = k.Number
-    const tuned = HAND_TUNED[number]
-    const meaningEn =
-      tuned?.meaningEn ?? kidEnglish(k.explanation, k.Translation, number)
-    const meaningTa = tuned?.meaningTa ?? pickTamilMeaning(k, number)
-    if (!meaningEn || !meaningTa) {
-      throw new Error(`missing meaning for kural ${number}`)
-    }
-    return {
-      number,
-      line1: k.Line1,
-      line2: k.Line2,
-      meaningTa,
-      meaningEn,
-    }
-  })
+  const included = new Set()
+  for (const ch of chapters) {
+    for (let n = ch.start; n <= ch.end; n++) included.add(n)
+  }
+
+  const kurals = raw
+    .filter((k) => included.has(k.Number))
+    .map((k) => {
+      const number = k.Number
+      const tuned = HAND_TUNED[number]
+      const meaningEn = ageSafeEnglish(
+        tuned?.meaningEn ?? kidEnglish(k.explanation, k.Translation, number),
+      )
+      const meaningTa = ageSafeTamil(
+        tuned?.meaningTa ?? pickTamilMeaning(k, number),
+      )
+      if (!meaningEn || !meaningTa) {
+        throw new Error(`missing meaning for kural ${number}`)
+      }
+      return {
+        number,
+        line1: k.Line1,
+        line2: k.Line2,
+        meaningTa,
+        meaningEn,
+      }
+    })
+
+  assertKidSafe(kurals)
 
   mkdirSync(OUT_DIR, { recursive: true })
 
   const chaptersTs = `/** Generated by scripts/gen-thirukkural.mjs — do not edit by hand. */
-export type PaalId = 'aram' | 'porul' | 'inbam'
+export type PaalId = 'aram' | 'porul'
 
 export type Chapter = {
   id: number
@@ -631,10 +852,9 @@ export const PAALS: Record<
 > = {
   aram: { id: 'aram', nameTa: 'அறத்துப்பால்', nameEn: 'Good ways', emoji: '💚' },
   porul: { id: 'porul', nameTa: 'பொருட்பால்', nameEn: 'Work & wisdom', emoji: '📘' },
-  inbam: { id: 'inbam', nameTa: 'இன்பத்துப்பால்', nameEn: 'Caring hearts', emoji: '💛' },
 }
 
-export const PAAL_ORDER: PaalId[] = ['aram', 'porul', 'inbam']
+export const PAAL_ORDER: PaalId[] = ['aram', 'porul']
 
 export const CHAPTERS: Chapter[] = [
 ${chapters

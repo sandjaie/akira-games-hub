@@ -10,6 +10,8 @@ import { KURALS, type Kural } from './kurals.generated'
 export type { Chapter, Kural, PaalId }
 export { CHAPTERS, KURALS, PAAL_ORDER, PAALS }
 
+const KURAL_BY_NUMBER = new Map(KURALS.map((k) => [k.number, k]))
+
 export function getChapter(id: number): Chapter {
   const chapter = CHAPTERS.find((c) => c.id === id)
   if (!chapter) throw new Error(`unknown chapter ${id}`)
@@ -28,10 +30,8 @@ export function kuralsForChapter(chapterId: number): Kural[] {
 }
 
 export function getKural(number: number): Kural {
-  const kural = KURALS[number - 1]
-  if (!kural || kural.number !== number) {
-    throw new Error(`unknown kural ${number}`)
-  }
+  const kural = KURAL_BY_NUMBER.get(number)
+  if (!kural) throw new Error(`unknown kural ${number}`)
   return kural
 }
 
