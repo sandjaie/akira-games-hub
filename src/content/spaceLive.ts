@@ -17,7 +17,7 @@ import { fetchTopicCards } from './factEngine'
 import { dayKey, freshFacts, moonPhaseForDay } from './spaceFacts'
 import { markSeen, pickFresh } from './seen'
 import { topicsFor } from './spaceTopics'
-import { MOON_FACTS, PLANET_FACTS } from './space/generatedFacts'
+import { MOON_FACTS, PLANET_FACTS, ROCK_FACTS } from './space/generatedFacts'
 
 const CACHE_KEY = 'space-today-v1'
 const TIMEOUT_MS = 4500
@@ -181,7 +181,8 @@ export function todayCardsOffline(now = new Date()): LearnCard[] {
 const GENERATED: Partial<Record<MissionId, LearnCard[]>> = {
   planets: PLANET_FACTS,
   moon: MOON_FACTS,
-  'wow-facts': [...PLANET_FACTS, ...MOON_FACTS],
+  'space-rocks': ROCK_FACTS,
+  'wow-facts': [...PLANET_FACTS, ...MOON_FACTS, ...ROCK_FACTS],
 }
 
 export function generatedFor(mission: MissionId, count = 6): LearnCard[] {

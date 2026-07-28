@@ -62,7 +62,7 @@ Recently seen words are remembered for the browser tab session so the next round
 
 ## Generating space facts
 
-`src/content/space/generatedFacts.ts` holds 113 facts built from
+`src/content/space/generatedFacts.ts` holds 1095 facts built from
 [Solar System OpenData](https://api.le-systeme-solaire.net/). To refresh it:
 
 ```bash
@@ -79,9 +79,23 @@ the generator, so correctness comes from the source and reading level comes
 from us. Templates check before they speak — the source has no average
 temperature for Mercury and no radius for Haumea.
 
-Facts are interleaved by template rather than sorted by name, or the rotation
-hands a kid three "A day on ..." cards in a row. Planet facts go to Meet the
-Planets, moon facts to Moon Mission, and both to Amazing Space Facts.
+Facts are interleaved by template **and offset per template**, or the rotation
+hands a kid Earth's day, Earth's year and Earth's moon count as three cards
+running. 1095 facts share 1094 distinct sentences.
+
+Most of the volume comes from comparing bodies rather than describing them:
+twelve planets make 66 pairs, and "you would weigh six times more on Jupiter
+than on Mars" is the kind a child repeats at dinner. Superlatives (biggest,
+coldest, most moons) are computed, never listed.
+
+Two gates keep the tail usable. Moons must be **named** — `S/2003 J 12` is a
+designation, not a name — and must orbit something a child has heard of, so the
+moons of obscure trans-Neptunian objects are out. Numbers a child cannot picture
+are replaced: a moon 868 times smaller than ours gets its real width in km
+instead.
+
+Planet facts go to Meet the Planets, moon facts to Moon Mission, rock facts to
+Space Rocks, and all three to Amazing Space Facts.
 
 ## Flags and country data
 
