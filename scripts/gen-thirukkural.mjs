@@ -166,6 +166,20 @@ const PAAL = {
   Love: { id: 'inbam', nameTa: 'இன்பத்துப்பால்', nameEn: 'Caring hearts', emoji: '💛' },
 }
 
+/**
+ * Chapters left out for ages 5–10.
+ * - 15: not coveting another’s wife
+ * - 91–92: romantic entanglement / வரைவின் மகளிர்
+ * - 109–133: entire காமத்துப்பால் (Kaamathupaal / Inbam)
+ */
+const EXCLUDED_CHAPTER_IDS = new Set([
+  15,
+  91,
+  92,
+  ...Array.from({ length: 25 }, (_, i) => 109 + i),
+])
+
+
 /** Whole-word English swaps — never match inside a longer word. */
 function wb(pattern, flags = 'gi') {
   return new RegExp(`\\b(?:${pattern})\\b`, flags)
@@ -343,13 +357,15 @@ const TA_CLEAN = [
 
 /** Age-safe Tamil replacements for every book (not only Book III). */
 const TA_SAFE = [
-  [/பாலியல் தொழிலாளர்களின்/g, 'நம்ப முடியாதவர்களின்'],
-  [/பாலியல் தொழிலாளரின்/g, 'நம்ப முடியாதவரின்'],
-  [/பாலியல் தொழிலாளர்/g, 'நம்ப முடியாதவர்'],
-  [/விலைமகளிர்/g, 'நம்ப முடியாதவர்'],
-  [/விலைமகள்/g, 'நம்ப முடியாதவர்'],
-  [/பரத்தையர்/g, 'நம்ப முடியாதவர்'],
-  [/பரத்தை/g, 'நம்ப முடியாதவர்'],
+  [/பாலியல்\s*தொழிலாளர்[^\s,]*/gu, 'நம்ப முடியாதவர்'],
+  [/விலைமகளிர்[^\s,]*/gu, 'நம்ப முடியாதவர்'],
+  [/விலைமகள்[^\s,]*/gu, 'நம்ப முடியாதவர்'],
+  [/பரத்தையர்[^\s,]*/gu, 'நம்ப முடியாதவர்'],
+  [/பரத்தை[^\s,]*/gu, 'நம்ப முடியாதவர்'],
+  [/மார்பகம்[^\s,]*/gu, 'அடையாளம்'],
+  [/மார்பை[^\s,]*/gu, 'உடலை'],
+  [/கற்புநெறி[^\s,]*/gu, 'நல்லொழுக்கம்'],
+  [/கற்பு[^\s,]*/gu, 'நல்லொழுக்கம்'],
   [/புணர்ச்சி/g, 'அன்புடன் சேர்தல்'],
   [/புணரும்/g, 'அன்புடன் சேரும்'],
   [/புணர்/g, 'சேர்'],
@@ -376,6 +392,8 @@ const EN_SAFE = [
   [wb('adultery'), 'breaking a promise'],
   [wb('adulterous'), 'unfaithful'],
   [wb('adulterers?'), 'someone unfaithful'],
+  [wb('chastity'), 'loyalty'],
+  [wb('breasts?'), 'a mark of strength'],
   [wb('sexual(?:ly)?'), 'grown-up'],
   [wb('sex'), 'grown-up stuff'],
   [wb('girlfriends?'), 'friends'],
@@ -651,60 +669,31 @@ const HAND_TUNED = {
     meaningTa:
       'நாம் உதவி செய்யாதபோதும் ஒருவர் நமக்கு உதவினால், அந்த உதவி உலகை விட பெரியது.',
   },
-  // Chapter 92 — stay away from fake friends (age-safe)
-  911: {
-    meaningEn: 'Sweet words from someone who only wants your things will bring you sorrow.',
-    meaningTa: 'உன் பொருளை மட்டும் விரும்பி இனிமையாகப் பேசுபவரின் சொல் துன்பம் தரும்.',
+  402: {
+    meaningEn:
+      'Wanting to hear an unlearned person speak in a wise gathering is like hoping for something that cannot happen.',
+    meaningTa:
+      'கல்லாதவர் சொல்வதைக் கேட்க விரும்புவது, நடக்காத ஒன்றை எதிர்பார்ப்பது போன்றது.',
   },
-  912: {
-    meaningEn: 'A fake smile from someone who wants gifts is not true caring.',
-    meaningTa: 'பரிசுக்காக மட்டும் சிரிப்பது உண்மையான அன்பு அல்ல.',
-  },
-  913: {
-    meaningEn: 'Wise people stay away from friends who only care about money.',
-    meaningTa: 'அறிவுள்ளவர் பணத்தை மட்டும் விரும்பும் நட்பை விலக்குவர்.',
-  },
-  914: {
-    meaningEn: 'People who love kindness will not chase after selfish fake friends.',
-    meaningTa: 'அருளை விரும்புபவர் சுயநல நட்பைத் தேடமாட்டார்.',
-  },
-  915: {
-    meaningEn: 'A clear mind will not follow people who only pretend to care.',
-    meaningTa: 'தெளிவான மனம் பாசாங்கு செய்யும் நட்பைப் பின்பற்றாது.',
-  },
-  916: {
-    meaningEn: 'The company of selfish fake friends will waste a good person’s strength.',
-    meaningTa: 'சுயநல நட்பு நல்லவனின் வலிமையை வீணாக்கும்.',
-  },
-  917: {
-    meaningEn: 'Only a weak mind runs after people who care only for themselves.',
-    meaningTa: 'வலுவற்ற மனமே தன்னை மட்டும் நினைப்பவரைத் தேடும்.',
-  },
-  918: {
-    meaningEn: 'The good fortune of the wise will not sink into selfish company.',
-    meaningTa: 'அறிஞரின் நல்வாழ்வு சுயநலக் கூட்டத்தில் மூழ்காது.',
-  },
-  919: {
-    meaningEn: 'Better a lonely path than friends who only want to take from you.',
-    meaningTa: 'உன்னிடம் இருந்து மட்டும் வாங்கும் நட்பை விட தனிவழி நன்று.',
-  },
-  920: {
-    meaningEn: 'Stay away from people who trap you with soft words and selfish plans.',
-    meaningTa: 'மென்மையான சொல்லால் சிக்க வைக்கும் சுயநலரை விட்டு விலகு.',
-  },
-  1311: {
-    meaningEn: 'A little sulk can make caring feel even sweeter when friends make up.',
-    meaningTa: 'சிறு ஊடலுக்குப் பிறகு சமாதானம் ஆனால் அன்பு இன்னும் இனிக்கும்.',
+  813: {
+    meaningEn:
+      'Friends who only want gain, fake friends who only want gifts, and thieves are all the same kind of people.',
+    meaningTa:
+      'பயனை மட்டும் எண்ணி நட்பு கொள்பவர், நம்ப முடியாதவர், கள்வர் ஆகிய மூவரும் ஒரே மாதிரி.',
   },
 }
 
 function flattenChapters(detail) {
   const out = []
+  if (CHAPTER_EN.length !== 133) throw new Error(`CHAPTER_EN length ${CHAPTER_EN.length}`)
   for (const sec of detail[0].section.detail) {
+    // Drop entire காமத்துப்பால் (Love / Kaamathupaal) for kids.
+    if (sec.translation === 'Love') continue
     const paal = PAAL[sec.translation]
     if (!paal) throw new Error(`unknown paal ${sec.translation}`)
     for (const cg of sec.chapterGroup.detail) {
       for (const ch of cg.chapters.detail) {
+        if (EXCLUDED_CHAPTER_IDS.has(ch.number)) continue
         out.push({
           id: ch.number,
           paalId: paal.id,
@@ -716,8 +705,10 @@ function flattenChapters(detail) {
       }
     }
   }
-  if (out.length !== 133) throw new Error(`expected 133 chapters, got ${out.length}`)
-  if (CHAPTER_EN.length !== 133) throw new Error(`CHAPTER_EN length ${CHAPTER_EN.length}`)
+  const expected = 133 - EXCLUDED_CHAPTER_IDS.size
+  if (out.length !== expected) {
+    throw new Error(`expected ${expected} kid chapters, got ${out.length}`)
+  }
   return out
 }
 
@@ -735,13 +726,24 @@ const FORBIDDEN_EN = [
   /\bwanton\b/i,
   /\bconcubine/i,
   /\badulter/i,
+  /\bsexual\b/i,
+  /\blovers?\b/i,
+  /\bembrace\b/i,
   // Mid-clause cuts that used to ship: "good persons, and." / "savages who."
   /,\s*(?:and|or|who|the|a|an|to|of)\.$/i,
   /\b(?:people who fight you|murderous savages)\s+who\.$/i,
   /\bwho\.$/i,
 ]
 
-const FORBIDDEN_TA = [/பாலியல்/, /விலைமகள்/, /விலைமகளிர்/, /பரத்தை/]
+const FORBIDDEN_TA = [
+  /பாலியல்/,
+  /விலைமகள்/,
+  /பரத்தை/,
+  /புணர்ச்சி/,
+  /காமம்/,
+  /காதல் நுகர்ச்சி/,
+  /மார்பகம்/,
+]
 
 function assertKidSafe(kurals) {
   const fails = []
@@ -771,33 +773,40 @@ async function main() {
   }
 
   const chapters = flattenChapters(detailJson)
-  const kurals = raw.map((k) => {
-    const number = k.Number
-    const tuned = HAND_TUNED[number]
-    const meaningEn = ageSafeEnglish(
-      tuned?.meaningEn ?? kidEnglish(k.explanation, k.Translation, number),
-    )
-    const meaningTa = ageSafeTamil(
-      tuned?.meaningTa ?? pickTamilMeaning(k, number),
-    )
-    if (!meaningEn || !meaningTa) {
-      throw new Error(`missing meaning for kural ${number}`)
-    }
-    return {
-      number,
-      line1: k.Line1,
-      line2: k.Line2,
-      meaningTa,
-      meaningEn,
-    }
-  })
+  const included = new Set()
+  for (const ch of chapters) {
+    for (let n = ch.start; n <= ch.end; n++) included.add(n)
+  }
+
+  const kurals = raw
+    .filter((k) => included.has(k.Number))
+    .map((k) => {
+      const number = k.Number
+      const tuned = HAND_TUNED[number]
+      const meaningEn = ageSafeEnglish(
+        tuned?.meaningEn ?? kidEnglish(k.explanation, k.Translation, number),
+      )
+      const meaningTa = ageSafeTamil(
+        tuned?.meaningTa ?? pickTamilMeaning(k, number),
+      )
+      if (!meaningEn || !meaningTa) {
+        throw new Error(`missing meaning for kural ${number}`)
+      }
+      return {
+        number,
+        line1: k.Line1,
+        line2: k.Line2,
+        meaningTa,
+        meaningEn,
+      }
+    })
 
   assertKidSafe(kurals)
 
   mkdirSync(OUT_DIR, { recursive: true })
 
   const chaptersTs = `/** Generated by scripts/gen-thirukkural.mjs — do not edit by hand. */
-export type PaalId = 'aram' | 'porul' | 'inbam'
+export type PaalId = 'aram' | 'porul'
 
 export type Chapter = {
   id: number
@@ -814,10 +823,9 @@ export const PAALS: Record<
 > = {
   aram: { id: 'aram', nameTa: 'அறத்துப்பால்', nameEn: 'Good ways', emoji: '💚' },
   porul: { id: 'porul', nameTa: 'பொருட்பால்', nameEn: 'Work & wisdom', emoji: '📘' },
-  inbam: { id: 'inbam', nameTa: 'இன்பத்துப்பால்', nameEn: 'Caring hearts', emoji: '💛' },
 }
 
-export const PAAL_ORDER: PaalId[] = ['aram', 'porul', 'inbam']
+export const PAAL_ORDER: PaalId[] = ['aram', 'porul']
 
 export const CHAPTERS: Chapter[] = [
 ${chapters

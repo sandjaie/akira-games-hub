@@ -1694,14 +1694,6 @@
   background: #d8f1fb;
 }
 
-.hub-card.tamizh-paal-inbam {
-  border-color: #f7a8c8;
-}
-
-.hub-card.tamizh-paal-inbam .hub-icon {
-  background: #ffe4f0;
-}
-
 .thirukkural-chapter-list {
   max-height: min(62vh, 520px);
   overflow: auto;

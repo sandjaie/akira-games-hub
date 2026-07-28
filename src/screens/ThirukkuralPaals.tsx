@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { playSfx, stopBgm } from '../audio/sounds'
 import { SoundToggle } from '../components/SoundToggle'
-import { PAAL_ORDER, PAALS, type PaalId } from '../content/thirukkural'
+import { PAAL_ORDER, PAALS, CHAPTER_COUNT, KURAL_COUNT, type PaalId } from '../content/thirukkural'
 
 type Props = {
   onBack: () => void
@@ -24,8 +24,10 @@ export function ThirukkuralPaals({ onBack, onPick }: Props) {
         <span className="words-top-spacer" aria-hidden="true" />
       </div>
 
-      <h1 className="display">Three big books</h1>
-      <p className="subtitle">133 chapters · 1330 kurals for kids</p>
+      <h1 className="display">Two big books</h1>
+      <p className="subtitle">
+        {CHAPTER_COUNT} chapters · {KURAL_COUNT} kurals for kids
+      </p>
 
       <div className="hub-cards">
         {PAAL_ORDER.map((id) => {
