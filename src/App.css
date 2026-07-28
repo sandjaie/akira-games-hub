@@ -38,53 +38,6 @@
   margin: 0 0 0.25rem;
 }
 
-.welcome .hero-pc {
-  width: min(280px, 70vw);
-  height: 180px;
-  margin: 0.5rem auto 1rem;
-  position: relative;
-}
-
-.welcome .hero-monitor {
-  position: absolute;
-  left: 18%;
-  right: 18%;
-  top: 0;
-  height: 58%;
-  background: linear-gradient(180deg, #9ed7ea, #5fb0d0);
-  border: 6px solid var(--tower);
-  border-radius: 14px;
-}
-
-.welcome .hero-stand {
-  position: absolute;
-  left: 45%;
-  width: 10%;
-  top: 58%;
-  height: 12%;
-  background: var(--tower);
-}
-
-.welcome .hero-base {
-  position: absolute;
-  left: 32%;
-  width: 36%;
-  top: 68%;
-  height: 8%;
-  background: var(--tower);
-  border-radius: 6px;
-}
-
-.welcome .hero-tower {
-  position: absolute;
-  right: 4%;
-  bottom: 8%;
-  width: 18%;
-  height: 55%;
-  background: linear-gradient(180deg, #6b7d90, var(--tower));
-  border-radius: 10px;
-}
-
 .welcome .actions,
 .celebration .actions,
 .station .actions,
@@ -124,85 +77,33 @@
 .lab-stage {
   position: relative;
   margin-top: 0.5rem;
-  min-height: 420px;
-  background:
-    linear-gradient(180deg, transparent 62%, var(--desk) 62%, var(--desk-dark) 100%),
-    linear-gradient(180deg, #d9f0f8 0%, #cfe8c9 100%);
+  aspect-ratio: 16 / 9;
   border-radius: 28px;
   border: 4px solid rgba(28, 42, 58, 0.08);
   box-shadow: var(--shadow);
   overflow: hidden;
 }
 
-.pc-art {
+.lab-scene {
   position: absolute;
-  inset: 8% 8% 22% 8%;
-  pointer-events: none;
-}
-
-.pc-monitor {
-  position: absolute;
-  left: 18%;
-  width: 46%;
-  height: 48%;
-  background: linear-gradient(180deg, #8fd0e8, #4fa3c4);
-  border: 7px solid var(--tower);
-  border-radius: 16px;
-}
-
-.pc-monitor::after {
-  content: '';
-  position: absolute;
-  left: 42%;
-  bottom: -14%;
-  width: 16%;
-  height: 14%;
-  background: var(--tower);
-}
-
-.pc-tower {
-  position: absolute;
-  right: 8%;
-  top: 18%;
-  width: 22%;
-  height: 62%;
-  background: linear-gradient(180deg, #738495, var(--tower));
-  border-radius: 14px;
-  border: 3px solid rgba(0, 0, 0, 0.08);
-}
-
-.pc-keyboard {
-  position: absolute;
-  left: 16%;
-  bottom: 8%;
-  width: 48%;
-  height: 14%;
-  background: #e8eef3;
-  border-radius: 10px;
-  border: 3px solid #b7c3ce;
-}
-
-.pc-mouse {
-  position: absolute;
-  left: 68%;
-  bottom: 10%;
-  width: 10%;
-  height: 12%;
-  background: #dfe7ee;
-  border-radius: 40% 40% 45% 45%;
-  border: 3px solid #b7c3ce;
+  inset: 0;
+  width: 100%;
+  height: 100%;
 }
 
 .hotspot {
   position: absolute;
   z-index: 2;
+  transform: translate(-50%, -50%);
   border-radius: 18px;
-  padding: 0.55rem 0.8rem;
-  font-size: 0.95rem;
-  min-height: var(--tap-min);
+  padding: 0.4rem 0.7rem;
+  font-size: 0.9rem;
+  min-height: 40px;
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
+  white-space: nowrap;
+  box-shadow: 0 3px 10px rgba(28, 42, 58, 0.25);
 }
 
 .hotspot.status-available {
@@ -217,45 +118,53 @@
 }
 
 .hotspot.status-locked {
-  background: #c5ced6;
-  color: #f4f7fa;
+  background: #cfd8e0;
+  color: #55636f;
+  opacity: 1;
 }
 
 .hotspot-monitor {
-  top: 14%;
-  left: 26%;
+  left: 37.5%;
+  top: 30%;
 }
 .hotspot-keyboard {
-  bottom: 18%;
-  left: 24%;
+  left: 48.9%;
+  top: 88%;
 }
 .hotspot-mouse {
-  bottom: 18%;
-  left: 62%;
+  left: 85%;
+  top: 88%;
+}
+
+/* the three tower parts label from the gap left of the tower, so the
+   chip / sticks / drive drawings stay visible */
+.hotspot-cpu,
+.hotspot-memory,
+.hotspot-storage {
+  left: auto;
+  right: 22.5%;
+  transform: translateY(-50%);
 }
 .hotspot-cpu {
-  top: 28%;
-  right: 10%;
+  top: 40.9%;
 }
 .hotspot-memory {
-  top: 42%;
-  right: 10%;
+  top: 55.8%;
 }
 .hotspot-storage {
-  top: 56%;
-  right: 10%;
+  top: 68.7%;
 }
 .hotspot-power {
-  bottom: 28%;
-  right: 10%;
+  left: 11.3%;
+  top: 72.9%;
 }
 .hotspot-speakers {
-  top: 18%;
-  left: 6%;
+  left: 24%;
+  top: 83.3%;
 }
 .hotspot-wifi {
-  top: 6%;
-  right: 28%;
+  left: 10.6%;
+  top: 23.3%;
 }
 
 .star {
@@ -275,7 +184,9 @@
 }
 
 .laptop-bonus:disabled {
-  background: var(--locked);
+  background: #cfd8e0;
+  color: #55636f;
+  opacity: 1;
 }
 
 .station-panel,
@@ -535,18 +446,30 @@
   animation: cheer 0.9s ease infinite;
 }
 
+/* Too narrow to keep readable, tappable labels on top of the scene, so the
+   picture stays whole and the labels become a button row under it. */
 @media (max-width: 640px) {
   .lab-stage {
-    min-height: 520px;
+    aspect-ratio: auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0 0.6rem 0.8rem;
+    background: #dff1f7;
+  }
+
+  .lab-scene {
+    position: static;
+    width: calc(100% + 1.2rem);
+    height: auto;
+    margin: 0 -0.6rem 0.7rem;
   }
 
   .hotspot {
-    font-size: 0.85rem;
-    padding: 0.45rem 0.65rem;
-  }
-
-  .pc-art {
-    inset: 10% 4% 28% 4%;
+    position: static;
+    transform: none;
+    min-height: var(--tap-min);
   }
 }
 
@@ -554,6 +477,65 @@
 
 .hub {
   width: 100%;
+}
+
+.name-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  justify-content: center;
+  margin: 0.5rem 0 0.25rem;
+}
+
+.name-input {
+  font: inherit;
+  font-weight: 800;
+  font-size: 1.15rem;
+  text-align: center;
+  min-height: var(--tap-min);
+  width: min(260px, 70vw);
+  padding: 0.6rem 1rem;
+  border-radius: 999px;
+  border: 3px solid var(--sky);
+  background: var(--white);
+  color: var(--ink);
+}
+
+.name-input:focus-visible {
+  outline: 3px solid var(--sun);
+  outline-offset: 3px;
+}
+
+.name-change {
+  align-self: center;
+  margin-top: 0.9rem;
+  font-size: 0.9rem;
+  padding: 0.45rem 1rem;
+  min-height: 40px;
+}
+
+.maker-note {
+  width: min(520px, 100%);
+  margin: 1.1rem auto 0;
+  padding: 0.9rem 1.1rem;
+  border-radius: var(--radius);
+  background: var(--white);
+  box-shadow: var(--shadow);
+  text-align: center;
+  font-size: 0.98rem;
+}
+
+.maker-note p {
+  margin: 0.15rem 0;
+}
+
+.word-meaning {
+  margin: 0.4rem auto 0;
+  max-width: 30rem;
+  text-align: center;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--sky-deep);
 }
 
 .hub-cards {
@@ -637,69 +619,17 @@
 }
 
 .rainbow {
-  --r-w: min(560px, 92vw);
-  --r-h: 120px;
-  position: relative;
-  width: var(--r-w);
-  height: var(--r-h);
+  display: block;
+  width: min(420px, 100%);
+  aspect-ratio: 240 / 116;
   margin: 0 auto 0.75rem;
+  overflow: visible;
   filter: drop-shadow(0 8px 12px rgba(28, 42, 58, 0.1));
 }
 
 .rainbow.small {
-  --r-w: min(280px, 70vw);
-  --r-h: 72px;
+  width: min(250px, 100%);
   margin-bottom: 0.85rem;
-}
-
-.rainbow-arc {
-  position: absolute;
-  left: 50%;
-  bottom: 0;
-  transform: translateX(-50%);
-  border-style: solid;
-  border-bottom: none;
-  border-color: transparent;
-  border-top-left-radius: 50% 100%;
-  border-top-right-radius: 50% 100%;
-  box-sizing: border-box;
-}
-
-.rainbow-arc:nth-child(1) {
-  width: 100%;
-  height: 100%;
-  border-width: calc(var(--r-h) * 0.14);
-  border-top-color: #ff5a5a;
-}
-.rainbow-arc:nth-child(2) {
-  width: 88%;
-  height: 88%;
-  border-width: calc(var(--r-h) * 0.14);
-  border-top-color: #ff9f43;
-}
-.rainbow-arc:nth-child(3) {
-  width: 76%;
-  height: 76%;
-  border-width: calc(var(--r-h) * 0.14);
-  border-top-color: #ffd43b;
-}
-.rainbow-arc:nth-child(4) {
-  width: 64%;
-  height: 64%;
-  border-width: calc(var(--r-h) * 0.14);
-  border-top-color: #51cf66;
-}
-.rainbow-arc:nth-child(5) {
-  width: 52%;
-  height: 52%;
-  border-width: calc(var(--r-h) * 0.14);
-  border-top-color: #4dabf7;
-}
-.rainbow-arc:nth-child(6) {
-  width: 40%;
-  height: 40%;
-  border-width: calc(var(--r-h) * 0.14);
-  border-top-color: #845ef7;
 }
 
 .words-top-row {
@@ -1010,7 +940,8 @@
   font-weight: 800;
 }
 
-.screen.jumbled-results {
+.screen.jumbled-results,
+.screen.countries-results {
   justify-content: center;
   text-align: center;
   align-items: center;
@@ -1057,6 +988,11 @@
 
 .jumbled-slots.shake {
   animation: word-shake 0.45s ease;
+}
+
+.jumbled-slot.filled:disabled,
+.jumbled-slots.correct .jumbled-slot.filled {
+  opacity: 1;
 }
 
 .jumbled-slots.correct .jumbled-slot.filled {
@@ -1261,6 +1197,18 @@
   outline-offset: 3px;
 }
 
+.countries-choice:disabled {
+  background: var(--white);
+  color: var(--ink);
+  opacity: 0.5;
+}
+
+.countries-choice.correct,
+.countries-choice.wrong {
+  opacity: 1;
+  color: var(--ink);
+}
+
 .countries-choice.correct {
   background: #d8f5e0;
   border-color: #69db7c;
@@ -1322,7 +1270,7 @@
 }
 
 .continent-map {
-  width: min(420px, 100%);
+  width: min(380px, 100%);
   margin: 0.25rem auto;
 }
 
@@ -1335,62 +1283,93 @@
 }
 
 .map-stage {
-  position: relative;
+  display: block;
   width: 100%;
-  aspect-ratio: 1.3 / 1;
   border-radius: 20px;
-  background:
-    radial-gradient(circle at 20% 20%, #b8e0f0 0%, transparent 45%),
-    linear-gradient(160deg, #c8ebe0, #a8d4f0);
+  background: linear-gradient(160deg, #cdeaf7, #a8d4f0);
   border: 3px solid rgba(28, 42, 58, 0.1);
   box-shadow: var(--shadow);
   overflow: hidden;
 }
 
+.map-land path {
+  fill: #dcd3bd;
+  stroke: #b9ad91;
+  stroke-width: 2;
+  stroke-linejoin: round;
+}
+
+/* pickable countries look like every other country — finding the right one
+   is the game, so they must not stand out before it is answered */
 .map-region {
-  position: absolute;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  fill: #dcd3bd;
+  stroke: #b9ad91;
+  stroke-width: 2;
+  stroke-linejoin: round;
+  transition: fill 0.2s ease;
+}
+
+.map-name {
+  font-family: Fredoka, Nunito, sans-serif;
+  font-size: 46px;
+  font-weight: 700;
+  fill: var(--ink);
+  paint-order: stroke;
+  stroke: rgba(255, 253, 248, 0.9);
+  stroke-width: 10;
+  stroke-linejoin: round;
+  pointer-events: none;
+}
+
+.map-nudge {
   text-align: center;
-  padding: 0.25rem;
-  border-radius: 14px;
-  border: 2px solid rgba(28, 42, 58, 0.35);
-  background: #8fbf9f;
-  color: var(--ink);
-  font-weight: 800;
-  font-size: clamp(0.65rem, 2.4vw, 0.85rem);
-  line-height: 1.15;
-  box-shadow: 0 2px 0 rgba(28, 42, 58, 0.15);
-  cursor: default;
+  font-weight: 700;
+  color: var(--sky-deep);
+  min-height: 1.3em;
+  margin: 0;
 }
 
-button.map-region {
+.map-miss {
+  fill: transparent;
+  pointer-events: all;
+}
+
+.map-hit {
+  fill: none;
+  stroke: transparent;
+  stroke-width: 26;
+  stroke-linejoin: round;
+  pointer-events: all;
   cursor: pointer;
-  font-family: inherit;
 }
 
-button.map-region:focus-visible {
-  outline: 3px solid var(--sun);
-  outline-offset: 2px;
+/* outline would draw the path's bounding box — ring the shape instead */
+.map-hit:focus {
+  outline: none;
+}
+
+.map-hit:focus-visible {
+  stroke: var(--sun);
+  stroke-width: 16;
 }
 
 .map-region.highlight {
-  background: #f0c43a;
-  z-index: 2;
+  fill: var(--sun);
+  stroke: #a8790a;
 }
 
 .map-region.selected {
-  background: #7ec8e3;
+  fill: var(--sky);
 }
 
 .map-region.correct {
-  background: #69db7c;
+  fill: #69db7c;
+  stroke: #2f7a3e;
 }
 
 .map-region.wrong {
-  background: #e86f5c;
-  color: #fff;
+  fill: var(--coral);
+  stroke: #9c3a2b;
 }
 
 @media (prefers-reduced-motion: reduce) {

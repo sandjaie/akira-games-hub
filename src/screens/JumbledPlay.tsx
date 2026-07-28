@@ -6,6 +6,7 @@ import {
   type JumbledDifficulty,
   type JumbledEntry,
 } from '../content/jumbledWords'
+import { meaningOf } from '../content/wordMeanings'
 import {
   emptySlots,
   isAnswerCorrect,
@@ -65,9 +66,15 @@ export function JumbledPlay({ difficulty, onBack, onRoundComplete }: Props) {
 
   const entry = round?.[index]
   const word = entry?.word ?? ''
+  // once it is solved, tell them what the word means
+  const meaning = meaningOf(word)
 
   function loadEntry(nextIndex: number) {
-    const nextEntry = round?.[nextIndex]
+    loadEntryFrom(round ?? [], nextIndex)
+  }
+
+  function loadEntryFrom(entries: JumbledEntry[], nextIndex: number) {
+    const nextEntry = entries[nextIndex]
     if (!nextEntry) return
     const puzzle = buildPuzzle(nextEntry)
     setIndex(nextIndex)
@@ -143,7 +150,12 @@ export function JumbledPlay({ difficulty, onBack, onRoundComplete }: Props) {
     if (feedback === 'correct') {
       playSfx('whoosh')
       if (index + 1 >= round.length) {
-        onRoundComplete(starsFromHints(hintsUsed))
+        // play runs until the kid stops — top up with a fresh batch
+        void loadJumbledRound(difficulty).then((more) => {
+          if (more.length === 0) return
+          setRound([...round, ...more])
+          loadEntryFrom([...round, ...more], index + 1)
+        })
         return
       }
       loadEntry(index + 1)
@@ -235,12 +247,21 @@ export function JumbledPlay({ difficulty, onBack, onRoundComplete }: Props) {
     <main className="screen jumbled-play">
       <SoundToggle active={false} />
       <div className="words-top-row">
-        <button type="button" className="secondary" onClick={onBack}>
+        <button
+          type="button"
+          className="secondary"
+          onClick={() => {
+            if (index === 0 && feedback !== 'correct') {
+              onBack()
+              return
+            }
+            onRoundComplete(starsFromHints(hintsUsed))
+          }}
+        >
           ← Levels
         </button>
         <p className="eyebrow">
-          {difficulty === 'easy' ? 'Easy' : 'Medium'} · Word {index + 1} of{' '}
-          {round.length}
+          {difficulty === 'easy' ? 'Easy' : 'Medium'} · Word {index + 1}
         </p>
         <span className="words-top-spacer" />
       </div>
@@ -300,6 +321,9 @@ export function JumbledPlay({ difficulty, onBack, onRoundComplete }: Props) {
             ? 'Try again'
             : '\u00a0'}
       </p>
+      {feedback === 'correct' && meaning ? (
+        <p className="word-meaning">{meaning}</p>
+      ) : null}
 
       <div className="jumbled-controls">
         <button
@@ -326,7 +350,7 @@ export function JumbledPlay({ difficulty, onBack, onRoundComplete }: Props) {
         </button>
         {feedback === 'correct' ? (
           <button type="button" onClick={checkOrAdvance}>
-            {index + 1 >= round.length ? 'See stars' : 'Next →'}
+            Next →
           </button>
         ) : (
           <button

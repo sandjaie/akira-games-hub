@@ -1,6 +1,5 @@
-/** Kid-safe filters + Datamuse live word fetching with offline fallback. */
+/** Kid-safe word filters + "not seen recently" picking. */
 
-const DATAMUSE = 'https://api.datamuse.com/words'
 const RECENT_KEY = 'akira-recent-words'
 const RECENT_LIMIT = 80
 
@@ -28,6 +27,9 @@ const BLOCKLIST = new Set(
 )
 
 export type LengthRange = { min: number; max: number }
+
+/** A word plus the one-line kid explanation shown under it (when we have one). */
+export type WordEntry = { word: string; hint?: string }
 
 export function normalizeWord(raw: string): string | null {
   const word = raw.trim().toUpperCase()
@@ -84,61 +86,16 @@ export function rememberWords(words: string[]): void {
   }
 }
 
-/** Prefer words not seen recently this browser tab session. */
-export function preferFresh(words: string[], count: number): string[] {
-  const recent = new Set(readRecentWords())
-  const fresh = words.filter((w) => !recent.has(w))
-  const pool = fresh.length >= count ? fresh : words
-  const picked = shuffle(pool).slice(0, count)
-  rememberWords(picked)
-  return picked
-}
-
-type DatamuseRow = { word?: string }
-
-export async function fetchDatamuse(
-  params: Record<string, string>,
-  fetchImpl: typeof fetch = fetch,
-): Promise<string[]> {
-  const url = new URL(DATAMUSE)
-  for (const [k, v] of Object.entries(params)) url.searchParams.set(k, v)
-  url.searchParams.set('max', params.max ?? '100')
-  const res = await fetchImpl(url.toString())
-  if (!res.ok) throw new Error(`Datamuse ${res.status}`)
-  const data = (await res.json()) as DatamuseRow[]
-  return data.map((row) => row.word ?? '').filter(Boolean)
-}
-
-export type ThemeQuery = {
-  /** Datamuse “means like” */
-  ml: string
-  /** Optional topics hint */
-  topics?: string
-}
-
-export async function fetchThemeWordList(
-  query: ThemeQuery,
-  range: LengthRange,
+/** Prefer items not seen recently this browser tab session. */
+export function preferFresh<T>(
+  items: T[],
   count: number,
-  fallback: string[],
-  fetchImpl: typeof fetch = fetch,
-): Promise<string[]> {
-  try {
-    const raw = await fetchDatamuse(
-      {
-        ml: query.ml,
-        ...(query.topics ? { topics: query.topics } : {}),
-        md: 'p',
-        max: '120',
-      },
-      fetchImpl,
-    )
-    const filtered = filterKidWords(raw, range)
-    if (filtered.length < Math.min(5, count)) {
-      return preferFresh(filterKidWords(fallback, range), count)
-    }
-    return preferFresh(filtered, count)
-  } catch {
-    return preferFresh(filterKidWords(fallback, range), count)
-  }
+  key: (item: T) => string = (item) => String(item),
+): T[] {
+  const recent = new Set(readRecentWords())
+  const fresh = items.filter((item) => !recent.has(key(item).toUpperCase()))
+  const pool = fresh.length >= count ? fresh : items
+  const picked = shuffle(pool).slice(0, count)
+  rememberWords(picked.map(key))
+  return picked
 }

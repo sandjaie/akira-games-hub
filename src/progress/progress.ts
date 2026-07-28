@@ -30,7 +30,7 @@ const COUNTRIES_MODE_KEYS: CountriesModeKey[] = [
 
 export function emptyWordsProgress(): WordsProgress {
   return {
-    unlockedLevelIds: ['animals'],
+    unlockedLevelIds: [...WORD_LEVEL_ORDER],
     completedLevelIds: [],
     wordsTypedCount: 0,
   }
@@ -162,13 +162,12 @@ export function getLabStatus(
   return 'locked'
 }
 
+/** Every theme is open — kids pick what they feel like typing today. */
 export function getWordsStatus(
   words: WordsProgress,
   id: WordLevelId,
 ): 'locked' | 'available' | 'done' {
-  if (words.completedLevelIds.includes(id)) return 'done'
-  if (id === 'animals' || words.unlockedLevelIds.includes(id)) return 'available'
-  return 'locked'
+  return words.completedLevelIds.includes(id) ? 'done' : 'available'
 }
 
 export function completeWordLevel(

@@ -43,6 +43,7 @@ export type Screen =
       mode: CountriesMode
       difficulty: CountriesDifficulty
       score: number
+      asked: number
       stars: 0 | 1 | 2 | 3
     }
 

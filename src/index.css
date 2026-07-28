@@ -74,11 +74,12 @@ button:focus-visible {
   outline-offset: 3px;
 }
 
+/* dim, never recolour — disabled buttons double as state displays in these
+   games (a solved word, a revealed answer) and their text must stay readable */
 button:disabled {
-  background: var(--locked);
-  color: #eef2f5;
   cursor: not-allowed;
   box-shadow: none;
+  opacity: 0.6;
 }
 
 button.secondary {

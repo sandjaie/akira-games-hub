@@ -2,7 +2,7 @@
 
 A colorful game hub for kids — **Parts of the computer** (lab story + mini-games) and **Fun with Words** (rainbow typing practice).
 
-Built for a 6-year-old explorer: short sentences, big taps, playable on a laptop and iPad on the same Wi‑Fi. Fun with Words works with a **physical keyboard** or **on-screen letter taps** (iPad / phone).
+Built for a 6-year-old explorer: short sentences, big taps, playable on a laptop and iPad on the same Wi‑Fi. Whoever opens it types their own name on the welcome screen (kept in `localStorage`), and the games greet them by it. Fun with Words works with a **physical keyboard** or **on-screen letter taps** (iPad / phone).
 
 ## Play on this laptop
 
@@ -52,26 +52,14 @@ Progress (lab stars, word level unlocks, and jumbled best stars) is saved in the
 
 ## Word sources
 
-Fun with Words fetches **fresh kid-filtered words** from the free [Datamuse API](https://www.datamuse.com/api/). Words are filtered to short A–Z spellings and a small blocklist, with curated offline fallbacks.
+Fun with Words and Jumbled Words use **curated kid word lists** with a short hand-written meaning under every word (`src/content/wordMeanings.ts`). A dictionary API was tried first and dropped: asking Datamuse for “body” words returned *entity*, *moral*, *system*, and its definitions read like *“a protuberance on the face housing the nostrils”*. No network needed, so the games work offline.
 
 Jumbled Words uses curated local lists so every word keeps its exact picture clue or category.
 
 Recently seen words are remembered for the browser tab session so the next round prefers new ones.
 
-## Deploy on Vercel (anytime play + password)
+## Deploy on Vercel
 
 1. Push this repo to GitHub (`akira-games-hub`).
 2. In [Vercel](https://vercel.com): **Add New Project** → import `akira-games-hub` → Deploy (Vite is auto-detected).
-3. Project → **Settings → Environment Variables** (Production):
-
-| Name | Example |
-|------|---------|
-| `SITE_USER` | `akira` |
-| `SITE_PASSWORD` | *(pick a family password)* |
-
-4. Redeploy so the env vars apply.
-5. Open the Vercel URL — the browser will ask for username/password (HTTP Basic Auth via `middleware.ts`).
-
-Local `npm run play` stays unlocked (auth only runs when those env vars are set on Vercel).
-
-See `.env.example` for the variable names. Never commit real passwords.
+3. Open the Vercel URL — the site is public, no password.

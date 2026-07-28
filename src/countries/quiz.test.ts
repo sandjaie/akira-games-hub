@@ -64,11 +64,11 @@ describe('flag distractors', () => {
 })
 
 describe('maps questions', () => {
-  it('easy maps highlight the country with three name choices', () => {
+  it('easy maps highlight the country with four name choices', () => {
     const q = buildMapsEasyQuestion('brazil', sequential())
     expect(q.kind).toBe('maps-easy')
     expect(q.highlight).toBe('brazil')
-    expect(q.choices).toHaveLength(3)
+    expect(q.choices).toHaveLength(4)
     expect(q.choices).toContain('brazil')
   })
 

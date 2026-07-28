@@ -1,16 +1,15 @@
 import { useEffect, useRef, useState } from 'react'
 import { playSfx, stopBgm } from '../audio/sounds'
 import { SoundToggle } from '../components/SoundToggle'
-import { getCountry, ROUND_SIZE, type MapRegionId } from '../content/countries'
+import { getCountry, type MapRegionId } from '../content/countries'
 import { FlagSvg } from '../content/flags/FlagSvg'
 import { ContinentMap } from '../content/maps/ContinentMap'
 import {
-  buildRound,
+  buildQuestion,
   isCorrectChoice,
   starsFromScore,
   type CountriesDifficulty,
   type CountriesMode,
-  type CountriesQuestion,
   type RoundStars,
 } from '../countries/quiz'
 
@@ -18,7 +17,7 @@ type Props = {
   mode: CountriesMode
   difficulty: CountriesDifficulty
   onBack: () => void
-  onRoundComplete: (score: number, stars: RoundStars) => void
+  onRoundComplete: (score: number, asked: number, stars: RoundStars) => void
 }
 
 type Phase = 'ask' | 'reveal'
@@ -31,17 +30,17 @@ export function CountriesPlay({
   onBack,
   onRoundComplete,
 }: Props) {
-  const [round, setRound] = useState<CountriesQuestion[]>(() =>
-    buildRound(mode, difficulty),
+  const [question, setQuestion] = useState(() =>
+    buildQuestion(mode, difficulty),
   )
-  const [index, setIndex] = useState(0)
+  const [asked, setAsked] = useState(1)
   const [score, setScore] = useState(0)
   const scoreRef = useRef(0)
   const [phase, setPhase] = useState<Phase>('ask')
   const [picked, setPicked] = useState<string | null>(null)
+  const [nudge, setNudge] = useState('')
   const [wasCorrect, setWasCorrect] = useState(false)
 
-  const question = round[index]
   const country = getCountry(question.countryId)
 
   useEffect(() => {
@@ -49,12 +48,13 @@ export function CountriesPlay({
   }, [])
 
   useEffect(() => {
-    setRound(buildRound(mode, difficulty))
-    setIndex(0)
+    setQuestion(buildQuestion(mode, difficulty))
+    setAsked(1)
     setScore(0)
     scoreRef.current = 0
     setPhase('ask')
     setPicked(null)
+    setNudge('')
     setWasCorrect(false)
   }, [mode, difficulty])
 
@@ -62,6 +62,7 @@ export function CountriesPlay({
     if (phase !== 'ask') return
     const ok = isCorrectChoice(question, choice)
     setPicked(choice)
+    setNudge('')
     setWasCorrect(ok)
     setPhase('reveal')
     if (ok) {
@@ -73,39 +74,45 @@ export function CountriesPlay({
     }
   }
 
-  function finishOrNext() {
+  function nextQuestion() {
     playSfx('tap')
-    if (index + 1 >= round.length) {
-      const total = scoreRef.current
-      onRoundComplete(total, starsFromScore(total))
-      return
-    }
-    setIndex((i) => i + 1)
+    setQuestion(buildQuestion(mode, difficulty, question.countryId))
+    setAsked((n) => n + 1)
     setPhase('ask')
     setPicked(null)
+    setNudge('')
     setWasCorrect(false)
   }
 
-  const praise = PRAISE[index % PRAISE.length]
+  /** Back doubles as "that's enough" — show stars for whatever was played. */
+  function stop() {
+    playSfx('tap')
+    const answered = phase === 'reveal' ? asked : asked - 1
+    if (answered <= 0) {
+      onBack()
+      return
+    }
+    onRoundComplete(
+      scoreRef.current,
+      answered,
+      starsFromScore(scoreRef.current, answered),
+    )
+  }
+
+  const praise = PRAISE[asked % PRAISE.length]
   const showNameChoices =
     question.kind === 'flags' || question.kind === 'maps-easy'
+  const revealedId = phase === 'reveal' ? question.countryId : null
 
   return (
     <main className="screen countries-play">
       <SoundToggle active={false} />
       <div className="words-top-row">
-        <button
-          type="button"
-          className="secondary"
-          onClick={() => {
-            playSfx('tap')
-            onBack()
-          }}
-        >
+        <button type="button" className="secondary" onClick={stop}>
           ← Back
         </button>
         <p className="eyebrow">
-          {index + 1} / {ROUND_SIZE}
+          Question {asked} · Score {score}
         </p>
         <span className="words-top-spacer" aria-hidden="true" />
       </div>
@@ -127,7 +134,11 @@ export function CountriesPlay({
       ) : null}
 
       {question.kind === 'maps-easy' ? (
-        <ContinentMap board={question.board} highlight={question.highlight} />
+        <ContinentMap
+          board={question.board}
+          highlight={question.highlight}
+          correctId={revealedId}
+        />
       ) : null}
 
       {question.kind === 'maps-medium' ? (
@@ -135,7 +146,7 @@ export function CountriesPlay({
           board={question.board}
           selectable
           selectedId={(picked as MapRegionId | null) ?? null}
-          correctId={phase === 'reveal' ? question.countryId : null}
+          correctId={revealedId}
           wrongId={
             phase === 'reveal' && !wasCorrect
               ? ((picked as MapRegionId | null) ?? null)
@@ -143,7 +154,17 @@ export function CountriesPlay({
           }
           disabled={phase !== 'ask'}
           onSelect={(id) => answer(id)}
+          onMiss={() => {
+            playSfx('hint')
+            setNudge(`Tap a country to find ${country.name}.`)
+          }}
         />
+      ) : null}
+
+      {question.kind === 'maps-medium' && phase === 'ask' ? (
+        <p className="map-nudge" aria-live="polite">
+          {nudge}
+        </p>
       ) : null}
 
       {showNameChoices ? (
@@ -188,10 +209,13 @@ export function CountriesPlay({
           </p>
           <p className="countries-fact">{country.fact}</p>
           <p className="countries-score-live" aria-hidden="true">
-            Score {score} / {ROUND_SIZE}
+            Score {score} / {asked}
           </p>
-          <button type="button" onClick={finishOrNext}>
-            {index + 1 >= round.length ? 'See stars' : 'Next →'}
+          <button type="button" onClick={nextQuestion}>
+            Next →
+          </button>
+          <button type="button" className="secondary" onClick={stop}>
+            That’s enough
           </button>
         </section>
       ) : null}

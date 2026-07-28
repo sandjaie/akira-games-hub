@@ -90,14 +90,7 @@ export function pickRound(
   random: () => number = Math.random,
 ): JumbledEntry[] {
   const pool = shuffle([...getJumbledPool(difficulty)], random)
-  const words = preferFresh(
-    pool.map((e) => e.word),
-    count,
-  )
-  return words.map((word) => {
-    const found = pool.find((e) => e.word === word)!
-    return { ...found, word }
-  })
+  return preferFresh(pool, count, (e) => e.word)
 }
 
 /** Curated rounds keep picture clues and categories accurate for young kids. */

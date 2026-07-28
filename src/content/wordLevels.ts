@@ -1,4 +1,5 @@
-import { fetchThemeWordList, type ThemeQuery } from './wordApi'
+import { filterKidWords, preferFresh, type WordEntry } from './wordApi'
+import { meaningOf } from './wordMeanings'
 
 export type WordLevelId =
   | 'animals'
@@ -18,10 +19,8 @@ export type WordLevel = {
   id: WordLevelId
   title: string
   emoji: string
-  /** Datamuse query used for live words */
-  query: ThemeQuery
-  /** Offline / API-failure fallback (kid-curated) */
-  fallbackWords: string[]
+  /** Kid-curated word pool for this theme */
+  words: string[]
 }
 
 export const WORD_LEVEL_ORDER: WordLevelId[] = [
@@ -46,8 +45,7 @@ export const WORD_LEVELS: Record<WordLevelId, WordLevel> = {
     id: 'animals',
     title: 'Animals',
     emoji: '🐾',
-    query: { ml: 'animal', topics: 'pet zoo farm' },
-    fallbackWords: [
+    words: [
       'CAT',
       'DOG',
       'BIRD',
@@ -74,8 +72,7 @@ export const WORD_LEVELS: Record<WordLevelId, WordLevel> = {
     id: 'colors',
     title: 'Colors',
     emoji: '🎨',
-    query: { ml: 'color', topics: 'paint crayon' },
-    fallbackWords: [
+    words: [
       'RED',
       'BLUE',
       'PINK',
@@ -100,8 +97,7 @@ export const WORD_LEVELS: Record<WordLevelId, WordLevel> = {
     id: 'school',
     title: 'School',
     emoji: '📚',
-    query: { ml: 'school', topics: 'classroom teacher' },
-    fallbackWords: [
+    words: [
       'BOOK',
       'PEN',
       'DESK',
@@ -128,8 +124,7 @@ export const WORD_LEVELS: Record<WordLevelId, WordLevel> = {
     id: 'home',
     title: 'Home',
     emoji: '🏠',
-    query: { ml: 'house', topics: 'home kitchen bedroom' },
-    fallbackWords: [
+    words: [
       'BED',
       'DOOR',
       'CUP',
@@ -156,8 +151,7 @@ export const WORD_LEVELS: Record<WordLevelId, WordLevel> = {
     id: 'play',
     title: 'Play',
     emoji: '🎮',
-    query: { ml: 'play', topics: 'game toy fun kids' },
-    fallbackWords: [
+    words: [
       'BALL',
       'GAME',
       'JUMP',
@@ -184,8 +178,7 @@ export const WORD_LEVELS: Record<WordLevelId, WordLevel> = {
     id: 'food',
     title: 'Food',
     emoji: '🍎',
-    query: { ml: 'food', topics: 'fruit snack meal' },
-    fallbackWords: [
+    words: [
       'APPLE',
       'MILK',
       'BREAD',
@@ -212,8 +205,7 @@ export const WORD_LEVELS: Record<WordLevelId, WordLevel> = {
     id: 'nature',
     title: 'Nature',
     emoji: '🌳',
-    query: { ml: 'nature', topics: 'tree outdoor garden' },
-    fallbackWords: [
+    words: [
       'TREE',
       'LEAF',
       'SUN',
@@ -240,8 +232,7 @@ export const WORD_LEVELS: Record<WordLevelId, WordLevel> = {
     id: 'family',
     title: 'Family',
     emoji: '👨‍👩‍👧',
-    query: { ml: 'family', topics: 'parent child love' },
-    fallbackWords: [
+    words: [
       'MOM',
       'DAD',
       'BABY',
@@ -266,8 +257,7 @@ export const WORD_LEVELS: Record<WordLevelId, WordLevel> = {
     id: 'body',
     title: 'Body',
     emoji: '💪',
-    query: { ml: 'body', topics: 'face hand foot' },
-    fallbackWords: [
+    words: [
       'HAND',
       'FOOT',
       'EYE',
@@ -294,8 +284,7 @@ export const WORD_LEVELS: Record<WordLevelId, WordLevel> = {
     id: 'weather',
     title: 'Weather',
     emoji: '⛅',
-    query: { ml: 'weather', topics: 'rain sun sky' },
-    fallbackWords: [
+    words: [
       'RAIN',
       'SNOW',
       'WIND',
@@ -320,8 +309,7 @@ export const WORD_LEVELS: Record<WordLevelId, WordLevel> = {
     id: 'transport',
     title: 'Transport',
     emoji: '🚗',
-    query: { ml: 'vehicle', topics: 'car train boat' },
-    fallbackWords: [
+    words: [
       'CAR',
       'BUS',
       'BIKE',
@@ -346,8 +334,7 @@ export const WORD_LEVELS: Record<WordLevelId, WordLevel> = {
     id: 'feelings',
     title: 'Feelings',
     emoji: '😊',
-    query: { ml: 'emotion', topics: 'happy sad kind' },
-    fallbackWords: [
+    words: [
       'HAPPY',
       'SAD',
       'MAD',
@@ -374,13 +361,16 @@ export function getWordLevel(id: WordLevelId): WordLevel {
   return WORD_LEVELS[id]
 }
 
-/** Live themed words for one Fun with Words round (fresh each play). */
-export async function loadLevelWords(id: WordLevelId): Promise<string[]> {
-  const level = WORD_LEVELS[id]
-  return fetchThemeWordList(
-    level.query,
-    { min: 3, max: 6 },
-    WORDS_PER_ROUND,
-    level.fallbackWords,
-  )
+/**
+ * Words for one round. The curated lists are the source: Datamuse's "means
+ * like" search returned grown-up abstractions for these themes — asking it for
+ * BODY words gave "entity", "moral", "system". Each word ships its own kid
+ * meaning, so nothing on screen depends on the network.
+ */
+export function loadLevelWords(id: WordLevelId): WordEntry[] {
+  const pool = filterKidWords(WORD_LEVELS[id].words, { min: 3, max: 7 })
+  return preferFresh(pool, WORDS_PER_ROUND).map((word) => ({
+    word,
+    hint: meaningOf(word),
+  }))
 }

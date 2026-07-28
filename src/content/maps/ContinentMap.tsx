@@ -1,8 +1,10 @@
 import {
+  MAP_BOARD_REGIONS,
   regionLabel,
   type MapBoardId,
   type MapRegionId,
 } from '../countries'
+import { BOARD_PATHS } from './mapPaths'
 
 type Props = {
   board: MapBoardId
@@ -13,86 +15,15 @@ type Props = {
   wrongId?: MapRegionId | null
   disabled?: boolean
   onSelect?: (id: MapRegionId) => void
+  /** Tapped the map but not a country. */
+  onMiss?: () => void
 }
 
-type RegionLayout = {
-  id: MapRegionId
-  left: string
-  top: string
-  width: string
-  height: string
-}
-
-const BOARDS: Record<
-  MapBoardId,
-  { label: string; regions: RegionLayout[] }
-> = {
-  'asia-pacific': {
-    label: 'Asia and Oceania',
-    regions: [
-      { id: 'india', left: '6%', top: '48%', width: '28%', height: '30%' },
-      { id: 'china', left: '32%', top: '22%', width: '34%', height: '34%' },
-      { id: 'japan', left: '72%', top: '28%', width: '20%', height: '24%' },
-      { id: 'australia', left: '54%', top: '62%', width: '32%', height: '28%' },
-    ],
-  },
-  europe: {
-    label: 'Europe',
-    regions: [
-      {
-        id: 'united-kingdom',
-        left: '12%',
-        top: '12%',
-        width: '24%',
-        height: '26%',
-      },
-      { id: 'france', left: '22%', top: '40%', width: '26%', height: '28%' },
-      { id: 'spain', left: '12%', top: '68%', width: '26%', height: '24%' },
-      { id: 'italy', left: '48%', top: '48%', width: '24%', height: '36%' },
-    ],
-  },
-  africa: {
-    label: 'Africa',
-    regions: [
-      { id: 'egypt', left: '40%', top: '6%', width: '28%', height: '22%' },
-      {
-        id: 'west-africa',
-        left: '6%',
-        top: '30%',
-        width: '30%',
-        height: '28%',
-      },
-      {
-        id: 'east-africa',
-        left: '48%',
-        top: '34%',
-        width: '30%',
-        height: '28%',
-      },
-      {
-        id: 'south-africa',
-        left: '34%',
-        top: '68%',
-        width: '30%',
-        height: '24%',
-      },
-    ],
-  },
-  americas: {
-    label: 'Americas',
-    regions: [
-      { id: 'canada', left: '22%', top: '4%', width: '42%', height: '22%' },
-      {
-        id: 'united-states',
-        left: '18%',
-        top: '26%',
-        width: '40%',
-        height: '22%',
-      },
-      { id: 'mexico', left: '16%', top: '48%', width: '28%', height: '18%' },
-      { id: 'brazil', left: '40%', top: '56%', width: '36%', height: '32%' },
-    ],
-  },
+const BOARD_LABELS: Record<MapBoardId, string> = {
+  'asia-pacific': 'Asia and Oceania',
+  europe: 'Europe',
+  africa: 'Africa',
+  americas: 'Americas',
 }
 
 function regionClass(
@@ -111,7 +42,8 @@ function regionClass(
 }
 
 /**
- * Simplified continent map — soft regions for geography practice.
+ * Real (Natural Earth) continent outlines. Names are never drawn on the map —
+ * the whole game is naming the highlighted shape.
  */
 export function ContinentMap({
   board,
@@ -122,59 +54,91 @@ export function ContinentMap({
   wrongId = null,
   disabled = false,
   onSelect,
+  onMiss,
 }: Props) {
-  const def = BOARDS[board]
+  const label = BOARD_LABELS[board]
+  const paths = BOARD_PATHS[board]
+  const [vx, vy, vw, vh] = paths.viewBox.split(' ').map(Number)
 
   return (
-    <div
-      className="continent-map"
-      role="img"
-      aria-label={`${def.label} map`}
-    >
-      <p className="map-board-label">{def.label}</p>
-      <div className="map-stage">
-        {def.regions.map((r) => {
-          const label = regionLabel(r.id)
+    <div className="continent-map">
+      <p className="map-board-label">{label}</p>
+      <svg
+        className="map-stage"
+        viewBox={paths.viewBox}
+        style={{ aspectRatio: `${vw} / ${vh}` }}
+        preserveAspectRatio="xMidYMid meet"
+        role={selectable ? 'group' : 'img'}
+        aria-label={`${label} map`}
+      >
+        <g className="map-land" aria-hidden="true">
+          {paths.land.map((d) => (
+            <path key={d.slice(0, 24)} d={d} />
+          ))}
+        </g>
+        {selectable && !disabled ? (
+          // catches taps that land nowhere, so the map never feels dead
+          <rect
+            className="map-miss"
+            x={vx}
+            y={vy}
+            width={vw}
+            height={vh}
+            aria-hidden="true"
+            onClick={() => onMiss?.()}
+          />
+        ) : null}
+        {MAP_BOARD_REGIONS[board].map((id) => {
           const className = regionClass(
-            r.id,
+            id,
             highlight,
             selectedId,
             correctId,
             wrongId,
           )
-          const style = {
-            left: r.left,
-            top: r.top,
-            width: r.width,
-            height: r.height,
-          }
-          if (selectable) {
-            return (
-              <button
-                key={r.id}
-                type="button"
-                className={className}
-                style={style}
-                disabled={disabled}
-                aria-label={label}
-                onClick={() => onSelect?.(r.id)}
-              >
-                {label}
-              </button>
-            )
-          }
+          const shape = (
+            <path className={className} d={paths.regions[id]} aria-hidden="true" />
+          )
+          if (!selectable) return <g key={id}>{shape}</g>
           return (
-            <div
-              key={r.id}
-              className={className}
-              style={style}
-              aria-hidden="true"
-            >
-              {label}
-            </div>
+            <g key={id}>
+              {shape}
+              {/* fat transparent twin: small countries stay tappable by a 5yo */}
+              <path
+                className="map-hit"
+                d={paths.regions[id]}
+                role="button"
+                tabIndex={disabled ? -1 : 0}
+                aria-disabled={disabled}
+                aria-label={regionLabel(id)}
+                // don't take focus from a tap — Chrome paints a focus ring on
+                // any tabbable non-button, which reads as another answer colour
+                onPointerDown={(e) => e.preventDefault()}
+                onClick={() => !disabled && onSelect?.(id)}
+                onKeyDown={(e) => {
+                  if (disabled) return
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    onSelect?.(id)
+                  }
+                }}
+              />
+            </g>
           )
         })}
-      </div>
+        {/* on reveal, name the answer on the map itself */}
+        {correctId ? (
+          <text
+            className="map-name"
+            x={paths.labels[correctId][0]}
+            y={paths.labels[correctId][1]}
+            textAnchor="middle"
+            aria-hidden="true"
+          >
+            {regionLabel(correctId)}
+          </text>
+        ) : null}
+      </svg>
     </div>
   )
 }

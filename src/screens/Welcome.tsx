@@ -1,33 +1,68 @@
 import { useEffect, useState } from 'react'
 import { Rainbow } from '../components/Rainbow'
 import { SoundToggle } from '../components/SoundToggle'
-import { EXPLORER_NAME } from '../content/explorer'
+import {
+  cleanPlayerName,
+  MAKER_NAME,
+  NAME_MAX_LENGTH,
+} from '../content/explorer'
 import { isMuted, playSfx, startBgm, unlockAudio } from '../audio/sounds'
 
 type Props = {
+  name: string
+  onName: (name: string) => void
   onLab: () => void
   onWords: () => void
   onJumbled: () => void
   onCountries: () => void
 }
 
-export function Welcome({ onLab, onWords, onJumbled, onCountries }: Props) {
-  const [musicReady, setMusicReady] = useState(false)
+function MakerNote() {
+  return (
+    <section className="maker-note">
+      <p>
+        <strong>Hi! I&apos;m {MAKER_NAME}.</strong> I&apos;m 6 years old.
+      </p>
+      <p>I made these games with my dad, for every kid who loves a quiz.</p>
+      <p>Have fun! 🌈</p>
+    </section>
+  )
+}
 
+export function Welcome({
+  name,
+  onName,
+  onLab,
+  onWords,
+  onJumbled,
+  onCountries,
+}: Props) {
+  const [draft, setDraft] = useState(name)
+
+  // Music plays on the hub by default. Browsers block audio before the first
+  // gesture, so try right away and retry on the first tap/key if that failed.
   useEffect(() => {
-    const kickoff = () => {
-      void unlockAudio().then(() => {
-        if (!isMuted()) void startBgm()
-        setMusicReady(true)
-      })
-      window.removeEventListener('pointerdown', kickoff)
-      window.removeEventListener('keydown', kickoff)
+    let done = false
+    const play = () => {
+      if (done || isMuted()) return
+      startBgm().then(
+        () => {
+          done = true
+        },
+        () => {
+          // autoplay blocked until a gesture — the listeners below retry
+        },
+      )
     }
-    window.addEventListener('pointerdown', kickoff)
-    window.addEventListener('keydown', kickoff)
+    play()
+    const retry = () => {
+      unlockAudio().then(play, play)
+    }
+    window.addEventListener('pointerdown', retry)
+    window.addEventListener('keydown', retry)
     return () => {
-      window.removeEventListener('pointerdown', kickoff)
-      window.removeEventListener('keydown', kickoff)
+      window.removeEventListener('pointerdown', retry)
+      window.removeEventListener('keydown', retry)
     }
   }, [])
 
@@ -36,18 +71,50 @@ export function Welcome({ onLab, onWords, onJumbled, onCountries }: Props) {
     next()
   }
 
+  if (!name) {
+    return (
+      <main className="screen welcome hub">
+        <SoundToggle active />
+        <Rainbow size="small" />
+        <p className="eyebrow">{MAKER_NAME}&apos;s games</p>
+        <h1 className="display">Hey kid, what&apos;s your name?</h1>
+        <form
+          className="name-form"
+          onSubmit={(e) => {
+            e.preventDefault()
+            const clean = cleanPlayerName(draft)
+            if (!clean) return
+            playSfx('cheer')
+            onName(clean)
+          }}
+        >
+          <input
+            className="name-input"
+            type="text"
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            maxLength={NAME_MAX_LENGTH}
+            autoComplete="off"
+            spellCheck={false}
+            aria-label="Your name"
+            placeholder="Type your name"
+          />
+          <button type="submit" disabled={!cleanPlayerName(draft)}>
+            Let&apos;s play →
+          </button>
+        </form>
+        <MakerNote />
+      </main>
+    )
+  }
+
   return (
     <main className="screen welcome hub">
       <SoundToggle active />
       <Rainbow size="small" />
-      <p className="eyebrow">{EXPLORER_NAME}&apos;s games</p>
-      <h1 className="display">Welcome {EXPLORER_NAME}!</h1>
+      <p className="eyebrow">{MAKER_NAME}&apos;s games</p>
+      <h1 className="display">Welcome {name}!</h1>
       <p className="subtitle">Pick a game</p>
-      {!musicReady && !isMuted() ? (
-        <p className="music-hint" role="status">
-          Tap anywhere for music 🎵
-        </p>
-      ) : null}
       <div className="hub-cards">
         <button
           type="button"
@@ -72,7 +139,7 @@ export function Welcome({ onLab, onWords, onJumbled, onCountries }: Props) {
           </span>
           <span>
             <span className="hub-title">Fun with Words</span>
-            <span className="hub-blurb">Type fun words!</span>
+            <span className="hub-blurb">Keyboard typing practice</span>
           </span>
         </button>
         <button
@@ -102,6 +169,18 @@ export function Welcome({ onLab, onWords, onJumbled, onCountries }: Props) {
           </span>
         </button>
       </div>
+      <button
+        type="button"
+        className="secondary name-change"
+        onClick={() => {
+          playSfx('tap')
+          setDraft('')
+          onName('')
+        }}
+      >
+        Not {name}? Change name
+      </button>
+      <MakerNote />
     </main>
   )
 }

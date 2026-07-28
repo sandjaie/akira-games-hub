@@ -1,7 +1,6 @@
 import { useEffect } from 'react'
 import { playSfx, stopBgm } from '../audio/sounds'
 import { SoundToggle } from '../components/SoundToggle'
-import { ROUND_SIZE } from '../content/countries'
 import type {
   CountriesDifficulty,
   CountriesMode,
@@ -12,6 +11,7 @@ type Props = {
   mode: CountriesMode
   difficulty: CountriesDifficulty
   score: number
+  asked: number
   stars: RoundStars
   onReplay: () => void
   onModes: () => void
@@ -22,6 +22,7 @@ export function CountriesResults({
   mode,
   difficulty,
   score,
+  asked,
   stars,
   onReplay,
   onModes,
@@ -42,8 +43,8 @@ export function CountriesResults({
       <p className="subtitle">
         {modeLabel} · {diffLabel}
       </p>
-      <p className="countries-final-score" aria-label={`Score ${score} out of ${ROUND_SIZE}`}>
-        {score} / {ROUND_SIZE} correct
+      <p className="countries-final-score" aria-label={`Score ${score} out of ${asked}`}>
+        {score} / {asked} correct
       </p>
       <p className="jumbled-stars" aria-label={`${stars} stars`}>
         {'★'.repeat(stars)}

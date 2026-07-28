@@ -60,7 +60,7 @@ describe('progress', () => {
     expect(p.lab.completed).toEqual(['monitor'])
     expect(p.words.unlockedLevelIds).toContain('animals')
     expect(getWordsStatus(p.words, 'animals')).toBe('available')
-    expect(getWordsStatus(p.words, 'colors')).toBe('locked')
+    expect(getWordsStatus(p.words, 'colors')).toBe('available')
   })
 
   it('unlocks next word level after clear', () => {

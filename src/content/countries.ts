@@ -29,11 +29,7 @@ export type CountryId =
   | 'brazil'
 
 /** Map-only hotspot used as a Medium distractor (never a question answer). */
-export type MapOnlyRegionId =
-  | 'mexico'
-  | 'west-africa'
-  | 'east-africa'
-  | 'spain'
+export type MapOnlyRegionId = 'mexico' | 'nigeria' | 'kenya' | 'spain'
 
 export type MapRegionId = CountryId | MapOnlyRegionId
 
@@ -166,14 +162,14 @@ export const COUNTRIES: Record<CountryId, Country> = {
 export const MAP_BOARD_REGIONS: Record<MapBoardId, MapRegionId[]> = {
   'asia-pacific': ['india', 'china', 'japan', 'australia'],
   europe: ['united-kingdom', 'france', 'italy', 'spain'],
-  africa: ['egypt', 'west-africa', 'east-africa', 'south-africa'],
+  africa: ['egypt', 'nigeria', 'kenya', 'south-africa'],
   americas: ['canada', 'united-states', 'mexico', 'brazil'],
 }
 
 export const MAP_ONLY_LABELS: Record<MapOnlyRegionId, string> = {
   mexico: 'Mexico',
-  'west-africa': 'West Africa',
-  'east-africa': 'East Africa',
+  nigeria: 'Nigeria',
+  kenya: 'Kenya',
   spain: 'Spain',
 }
 

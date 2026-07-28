@@ -54,13 +54,15 @@ export function modeKey(
   return `${mode}-${difficulty}`
 }
 
-/** 5→3, 3–4→2, 1–2→1, 0→0 */
+/** Share of answers right: 100%→3, 60%+→2, any→1, none→0. */
 export function starsFromScore(correct: number, total = ROUND_SIZE): RoundStars {
+  if (total <= 0) return 0
   const score = Math.max(0, Math.min(total, correct))
-  if (score <= 0) return 0
-  if (score <= 2) return 1
-  if (score <= 4) return 2
-  return 3
+  const share = score / total
+  if (share <= 0) return 0
+  if (share >= 1) return 3
+  if (share >= 0.6) return 2
+  return 1
 }
 
 function shuffle<T>(items: T[], random: () => number = Math.random): T[] {
@@ -120,7 +122,7 @@ export function buildMapsEasyQuestion(
   const distractors = [
     ...shuffle(sameBoard, random),
     ...shuffle(rest, random),
-  ].slice(0, 2)
+  ].slice(0, 3)
   const choices = shuffle([countryId, ...distractors], random)
   return {
     kind: 'maps-easy',
@@ -143,6 +145,20 @@ export function buildMapsMediumQuestion(
     board,
     hotspots,
   }
+}
+
+/** One question at a time — play runs until the kid stops. */
+export function buildQuestion(
+  mode: CountriesMode,
+  difficulty: CountriesDifficulty,
+  avoid: CountryId | null = null,
+  random: () => number = Math.random,
+): CountriesQuestion {
+  const pool = COUNTRY_ORDER.filter((id) => id !== avoid)
+  const id = pool[Math.floor(random() * pool.length)]
+  if (mode === 'flags') return buildFlagQuestion(id, difficulty, random)
+  if (difficulty === 'easy') return buildMapsEasyQuestion(id, random)
+  return buildMapsMediumQuestion(id)
 }
 
 export function buildRound(

@@ -9,6 +9,7 @@ import {
   recordJumbledRound,
   saveProgress,
 } from './progress/progress'
+import { loadPlayerName, savePlayerName } from './content/explorer'
 import { Celebration } from './screens/Celebration'
 import { CountriesDifficulty } from './screens/CountriesDifficulty'
 import { CountriesMode } from './screens/CountriesMode'
@@ -29,14 +30,21 @@ import type { AppProgress, Screen } from './types'
 export default function App() {
   const [progress, setProgress] = useState<AppProgress>(() => loadProgress())
   const [screen, setScreen] = useState<Screen>({ name: 'welcome' })
+  const [player, setPlayer] = useState<string>(() => loadPlayerName())
 
   useEffect(() => {
     saveProgress(progress)
   }, [progress])
 
+  useEffect(() => {
+    savePlayerName(player)
+  }, [player])
+
   if (screen.name === 'welcome') {
     return (
       <Welcome
+        name={player}
+        onName={setPlayer}
         onLab={() => setScreen({ name: 'map' })}
         onWords={() => setScreen({ name: 'words-map' })}
         onJumbled={() => setScreen({ name: 'jumbled-difficulty' })}
@@ -48,6 +56,7 @@ export default function App() {
   if (screen.name === 'map') {
     return (
       <LabMap
+        name={player}
         progress={progress.lab}
         onHub={() => setScreen({ name: 'welcome' })}
         onOpenStation={(stationId) => setScreen({ name: 'station', stationId })}
@@ -59,6 +68,7 @@ export default function App() {
   if (screen.name === 'station') {
     return (
       <StationScene
+        name={player}
         stationId={screen.stationId}
         onBack={() => setScreen({ name: 'map' })}
         onCompletedStation={(id) => {
@@ -71,6 +81,7 @@ export default function App() {
   if (screen.name === 'laptop') {
     return (
       <LaptopBonus
+        name={player}
         onBack={() => setScreen({ name: 'map' })}
         onComplete={() => {
           setProgress((p) => ({ ...p, lab: completeStation(p.lab, 'laptop') }))
@@ -192,7 +203,7 @@ export default function App() {
         onBack={() =>
           setScreen({ name: 'countries-difficulty', mode: screen.mode })
         }
-        onRoundComplete={(score, stars) => {
+        onRoundComplete={(score, asked, stars) => {
           setProgress((p) => ({
             ...p,
             countries: recordCountriesRound(
@@ -207,6 +218,7 @@ export default function App() {
             mode: screen.mode,
             difficulty: screen.difficulty,
             score,
+            asked,
             stars,
           })
         }}
@@ -220,6 +232,7 @@ export default function App() {
         mode={screen.mode}
         difficulty={screen.difficulty}
         score={screen.score}
+        asked={screen.asked}
         stars={screen.stars}
         onReplay={() =>
           setScreen({
@@ -236,6 +249,7 @@ export default function App() {
 
   return (
     <Celebration
+      name={player}
       onHub={() => setScreen({ name: 'welcome' })}
       onMap={() => setScreen({ name: 'map' })}
       onReplay={() => {

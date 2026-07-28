@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { playSfx, stopBgm } from '../audio/sounds'
 import { SoundToggle } from '../components/SoundToggle'
-import { EXPLORER_NAME } from '../content/explorer'
 
 type Pair = { id: string; label: string; spot: string }
 
@@ -13,11 +12,12 @@ const PAIRS: Pair[] = [
 ]
 
 type Props = {
+  name: string
   onBack: () => void
   onComplete: () => void
 }
 
-export function LaptopBonus({ onBack, onComplete }: Props) {
+export function LaptopBonus({ name, onBack, onComplete }: Props) {
   const [selected, setSelected] = useState<string | null>(null)
   const [matched, setMatched] = useState<string[]>([])
   const [hint, setHint] = useState('')
@@ -67,7 +67,7 @@ export function LaptopBonus({ onBack, onComplete }: Props) {
       </div>
       <section className="station-panel">
         <h1 className="display">Laptop peek</h1>
-        <p>{EXPLORER_NAME}, a laptop has the same friends inside!</p>
+        <p>{name}, a laptop has the same friends inside!</p>
         <p>Match each part to its cozy spot.</p>
         <div className="laptop-board">
           <div className="match-labels">

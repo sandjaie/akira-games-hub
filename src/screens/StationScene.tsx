@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { playSfx, stopBgm } from '../audio/sounds'
 import { SoundToggle } from '../components/SoundToggle'
-import { EXPLORER_NAME } from '../content/explorer'
 import { STATIONS } from '../content/stations'
 import { gameRegistry } from '../games/gameRegistry'
 import type { LabStationId } from '../types'
 
 type Props = {
+  name: string
   stationId: LabStationId
   onBack: () => void
   onCompletedStation: (id: LabStationId) => void
@@ -15,6 +15,7 @@ type Props = {
 type Phase = 'story' | 'play' | 'reward'
 
 export function StationScene({
+  name,
   stationId,
   onBack,
   onCompletedStation,
@@ -83,7 +84,7 @@ export function StationScene({
 
       {phase === 'reward' ? (
         <section className="reward">
-          <h2 className="display">You found it, {EXPLORER_NAME}!</h2>
+          <h2 className="display">You found it, {name}!</h2>
           <p>Nice exploring.</p>
           <div className="actions">
             <button

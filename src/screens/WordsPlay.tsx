@@ -7,6 +7,7 @@ import {
   loadLevelWords,
   type WordLevelId,
 } from '../content/wordLevels'
+import type { WordEntry } from '../content/wordApi'
 import {
   completeWordLevel,
   recordTypedWord,
@@ -41,7 +42,7 @@ export function WordsPlay({
   onLevelComplete,
 }: Props) {
   const level = getWordLevel(levelId)
-  const [roundWords, setRoundWords] = useState<string[] | null>(null)
+  const [roundWords, setRoundWords] = useState<WordEntry[] | null>(null)
   const [wordIndex, setWordIndex] = useState(0)
   const [typing, setTyping] = useState<TypingState | null>(null)
   const [dropKey, setDropKey] = useState(0)
@@ -54,22 +55,17 @@ export function WordsPlay({
   }, [])
 
   useEffect(() => {
-    let cancelled = false
-    setRoundWords(null)
-    setTyping(null)
+    const list = loadLevelWords(levelId)
     setWordIndex(0)
     setWordDone(false)
-    void loadLevelWords(levelId).then((list) => {
-      if (cancelled || list.length === 0) return
-      setRoundWords(list)
-      setTyping(createTypingState(list[0]))
-      setDropKey((k) => k + 1)
-      playSfx('whoosh')
-    })
-    return () => {
-      cancelled = true
-    }
+    setRoundWords(list)
+    setTyping(list.length > 0 ? createTypingState(list[0].word) : null)
+    setDropKey((k) => k + 1)
+    playSfx('whoosh')
   }, [levelId])
+
+  const entry = roundWords?.[wordIndex]
+  const meaning = entry?.hint
 
   function pressKey(key: string) {
     if (!typing || wordDone) return
@@ -100,7 +96,7 @@ export function WordsPlay({
       return
     }
     setWordIndex(nextIndex)
-    setTyping(createTypingState(roundWords[nextIndex]))
+    setTyping(createTypingState(roundWords[nextIndex].word))
     setDropKey((k) => k + 1)
     setWordDone(false)
     playSfx('whoosh')
@@ -207,13 +203,14 @@ export function WordsPlay({
             {current ? <span className="current">{current}</span> : null}
             {todo ? <span className="todo">{todo}</span> : null}
           </p>
+          {meaning ? <p className="word-meaning">{meaning}</p> : null}
         </div>
         <p className="hint">
           {wordDone
             ? isLast
               ? 'Nice! Tap Done to finish the theme'
               : 'Nice! Tap Done or Next for the next word'
-            : 'Tap the letters — or Next to skip'}
+            : 'Type it on your keyboard — or tap the letters below'}
         </p>
         <p className="word-progress-count">
           Word {wordIndex + 1} of {roundWords.length}

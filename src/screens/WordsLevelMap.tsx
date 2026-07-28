@@ -33,7 +33,10 @@ export function WordsLevelMap({ words, onBack, onPlay }: Props) {
         <span className="words-top-spacer" />
       </div>
       <h1 className="display">Pick a theme</h1>
-      <p className="subtitle">Words fall from the rainbow!</p>
+      <p className="subtitle">
+        Typing practice — words fall from the rainbow, type them on your
+        keyboard!
+      </p>
       <div className="word-levels">
         {WORD_LEVEL_ORDER.map((id) => {
           const level = WORD_LEVELS[id]
