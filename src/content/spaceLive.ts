@@ -173,6 +173,10 @@ export function todayCardsOffline(now = new Date()): LearnCard[] {
 /**
  * Facts generated from Solar System OpenData, phrased by us. No network, so
  * these show the instant a mission opens — the encyclopedia extras arrive after.
+ *
+ * The draw is deliberately far smaller than the pool: 113 facts are there to
+ * make each visit different, not to make one visit long. A six-year-old clicking
+ * Next twenty times has stopped learning somewhere around ten.
  */
 const GENERATED: Partial<Record<MissionId, LearnCard[]>> = {
   planets: PLANET_FACTS,
@@ -180,7 +184,7 @@ const GENERATED: Partial<Record<MissionId, LearnCard[]>> = {
   'wow-facts': [...PLANET_FACTS, ...MOON_FACTS],
 }
 
-export function generatedFor(mission: MissionId, count = 3): LearnCard[] {
+export function generatedFor(mission: MissionId, count = 6): LearnCard[] {
   const pool = GENERATED[mission] ?? []
   const picked = pickFresh(pool, count, (c) => `gen:${c.title}`)
   for (const card of picked) markSeen(`gen:${card.title}`)
