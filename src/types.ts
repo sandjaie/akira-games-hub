@@ -4,7 +4,9 @@ import type {
   CountriesModeKey,
 } from './countries/quiz'
 import type { JumbledDifficulty } from './content/jumbledWords'
+import type { MissionId } from './content/space'
 import type { WordLevelId } from './content/wordLevels'
+import type { SpaceStars } from './space/quiz'
 
 export type LabStationId =
   | 'monitor'
@@ -46,6 +48,17 @@ export type Screen =
       asked: number
       stars: 0 | 1 | 2 | 3
     }
+  | { name: 'space-mode' }
+  | { name: 'space-missions'; mode: 'learn' | 'quiz' }
+  | { name: 'space-learn'; missionId: MissionId }
+  | { name: 'space-play'; missionId: MissionId }
+  | {
+      name: 'space-results'
+      missionId: MissionId
+      score: number
+      asked: number
+      stars: SpaceStars
+    }
 
 export type LabProgress = { completed: StationId[] }
 
@@ -65,11 +78,17 @@ export type CountriesProgress = {
   bestStars: Partial<Record<CountriesModeKey, 1 | 2 | 3>>
 }
 
+export type SpaceProgress = {
+  learnedMissionIds: MissionId[]
+  bestStars: Partial<Record<MissionId, 1 | 2 | 3>>
+}
+
 export type AppProgress = {
   lab: LabProgress
   words: WordsProgress
   jumbled: JumbledProgress
   countries: CountriesProgress
+  space: SpaceProgress
 }
 
 export type GameKind =

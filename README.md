@@ -18,6 +18,8 @@ From the hub, pick:
 - **Parts of the computer** — explore lab PC parts
 - **Fun with Words** — type themed words that drop from a rainbow
 - **Jumbled Words** — unscramble letter tiles (Easy / Medium)
+- **Know the Countries** — flags and real maps (Easy / Medium)
+- **Space Explorer** — learn space facts, then quiz yourself
 
 ## Play on iPad (same Wi‑Fi)
 
@@ -57,6 +59,79 @@ Fun with Words and Jumbled Words use **curated kid word lists** with a short han
 Jumbled Words uses curated local lists so every word keeps its exact picture clue or category.
 
 Recently seen words are remembered for the browser tab session so the next round prefers new ones.
+
+## Space Explorer content, and how it stays fresh
+
+Space Explorer has two doors: **Learn** (illustrated fact cards per mission) and
+**Quiz** (picture-choice questions with a gentle correction). Nobody has to edit
+content daily — four layers keep it moving:
+
+| Layer | Where | Brings new content |
+|-------|-------|--------------------|
+| Curated missions | `src/content/space.ts` | the teaching core, always shown |
+| Fact bank | `src/content/spaceFacts.ts` | rotates by "not seen yet", offline |
+| Fact engine | `src/content/factEngine.ts` + `spaceTopics.ts` | new cards every visit |
+| Live data | `src/content/spaceLive.ts` | today's sky, when online |
+
+### The fact engine
+
+`factEngine.ts` turns an encyclopedia summary into a kid card — art, title, one
+or two short lines. The source is **Simple English Wikipedia**, the one
+encyclopedia already written at a basic reading level ("A comet is a ball of
+mostly ice that moves around in outer space").
+
+Its output still goes through a readability filter, because plenty of its
+sentences carry grown-up baggage. The filter drops a sentence that has jargon
+(`astronomical unit`, `ultraviolet`, `eccentricity`, …), leftover brackets or
+semicolons, 5-digit numbers, unit soup, a word over 12 letters, or more than 20
+words. Art is chosen by keyword (`saturn|titan|ring` → the Saturn drawing). If
+nothing in a summary survives, the card is dropped rather than shown — a card is
+never half-understandable.
+
+**To add content, add one line** to `MISSION_TOPICS` in `spaceTopics.ts`:
+
+```ts
+{ title: 'Ganymede', page: 'Ganymede (moon)', art: 'jupiter' }
+```
+
+That is a new card in that mission for ever, with no wording to write.
+
+### Rotation
+
+`src/content/seen.ts` remembers what this browser has been shown (topics, facts,
+cards) in `localStorage`. Every pick asks for **unseen first, then longest-ago**,
+so nothing repeats while anything new is left, and the pool still cycles once
+it has all been seen. Skipping a week no longer skips content the way a pure
+date rotation did.
+
+### Live data (🛰️ Today in Space)
+
+All keyless, all CORS-enabled from the browser, each with a 4.5s timeout, cached
+for the calendar day, skipped individually if it fails:
+
+| Data | Endpoint |
+|------|----------|
+| People in space right now | `corquaid.github.io/international-space-station-APIs` |
+| ISS altitude and speed | `api.wheretheiss.at/v1/satellites/25544` |
+| Next rocket launch | `ll.thespacedevs.com/2.3.0/launches/upcoming/` |
+
+Moon phase is *computed* from the date — no API beats arithmetic for something
+that predictable.
+
+Rule for anything live: **we read numbers and names, and write the sentence
+ourselves.** No API prose is ever shown to a child, except through the engine's
+filter above.
+
+Also surveyed and not used (yet):
+
+- **NASA APOD** (`api.nasa.gov/planetary/apod`) — a real photo every day, and
+  the obvious next addition. Needs a free API key, and its explanation is
+  written for adults, so only the image and title are usable.
+- **NASA Image Library** (`images-api.nasa.gov`) — keyless photo search, useful
+  for putting real Saturn/galaxy photos next to the drawings.
+- **English Wikipedia REST** — accurate, but adult reading level; Simple English
+  is the same API with a kid-level corpus.
+- **api.le-systeme-solaire.net** — planet numbers; now requires a key.
 
 ## Deploy on Vercel
 

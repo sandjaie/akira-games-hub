@@ -7,6 +7,8 @@ import {
   loadProgress,
   recordCountriesRound,
   recordJumbledRound,
+  recordMissionLearned,
+  recordMissionQuiz,
   saveProgress,
 } from './progress/progress'
 import { loadPlayerName, savePlayerName } from './content/explorer'
@@ -20,6 +22,11 @@ import { JumbledPlay } from './screens/JumbledPlay'
 import { JumbledResults } from './screens/JumbledResults'
 import { LabMap } from './screens/LabMap'
 import { LaptopBonus } from './screens/LaptopBonus'
+import { SpaceLearn } from './screens/SpaceLearn'
+import { SpaceMissions } from './screens/SpaceMissions'
+import { SpaceMode } from './screens/SpaceMode'
+import { SpacePlay } from './screens/SpacePlay'
+import { SpaceResults } from './screens/SpaceResults'
 import { StationScene } from './screens/StationScene'
 import { Welcome } from './screens/Welcome'
 import { WordsLevelClear } from './screens/WordsLevelClear'
@@ -49,6 +56,7 @@ export default function App() {
         onWords={() => setScreen({ name: 'words-map' })}
         onJumbled={() => setScreen({ name: 'jumbled-difficulty' })}
         onCountries={() => setScreen({ name: 'countries-mode' })}
+        onSpace={() => setScreen({ name: 'space-mode' })}
       />
     )
   }
@@ -242,6 +250,89 @@ export default function App() {
           })
         }
         onModes={() => setScreen({ name: 'countries-mode' })}
+        onHub={() => setScreen({ name: 'welcome' })}
+      />
+    )
+  }
+
+  if (screen.name === 'space-mode') {
+    return (
+      <SpaceMode
+        onBack={() => setScreen({ name: 'welcome' })}
+        onPick={(mode) => setScreen({ name: 'space-missions', mode })}
+      />
+    )
+  }
+
+  if (screen.name === 'space-missions') {
+    return (
+      <SpaceMissions
+        mode={screen.mode}
+        space={progress.space}
+        onBack={() => setScreen({ name: 'space-mode' })}
+        onPick={(missionId) =>
+          setScreen(
+            screen.mode === 'learn'
+              ? { name: 'space-learn', missionId }
+              : { name: 'space-play', missionId },
+          )
+        }
+      />
+    )
+  }
+
+  if (screen.name === 'space-learn') {
+    return (
+      <SpaceLearn
+        missionId={screen.missionId}
+        onBack={() => setScreen({ name: 'space-missions', mode: 'learn' })}
+        onLearned={() =>
+          setProgress((p) => ({
+            ...p,
+            space: recordMissionLearned(p.space, screen.missionId),
+          }))
+        }
+        onQuiz={() => setScreen({ name: 'space-play', missionId: screen.missionId })}
+      />
+    )
+  }
+
+  if (screen.name === 'space-play') {
+    return (
+      <SpacePlay
+        missionId={screen.missionId}
+        onBack={() => setScreen({ name: 'space-missions', mode: 'quiz' })}
+        onFinish={(score, asked, stars) => {
+          setProgress((p) => ({
+            ...p,
+            space: recordMissionQuiz(p.space, screen.missionId, stars),
+          }))
+          setScreen({
+            name: 'space-results',
+            missionId: screen.missionId,
+            score,
+            asked,
+            stars,
+          })
+        }}
+      />
+    )
+  }
+
+  if (screen.name === 'space-results') {
+    return (
+      <SpaceResults
+        missionId={screen.missionId}
+        score={screen.score}
+        asked={screen.asked}
+        stars={screen.stars}
+        onReplay={() =>
+          setScreen({ name: 'space-play', missionId: screen.missionId })
+        }
+        onLearn={() =>
+          setScreen({ name: 'space-learn', missionId: screen.missionId })
+        }
+        onMissions={() => setScreen({ name: 'space-missions', mode: 'quiz' })}
         onHub={() => setScreen({ name: 'welcome' })}
       />
     )

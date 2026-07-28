@@ -82,6 +82,7 @@ describe('progress', () => {
       },
       jumbled: { completedDifficulties: [], bestStars: {} },
       countries: { completedModes: [], bestStars: {} },
+      space: { learnedMissionIds: [], bestStars: {} },
     })
     const p = loadProgress()
     expect(p.words.unlockedLevelIds).toContain('animals')

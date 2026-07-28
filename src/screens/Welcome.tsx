@@ -15,6 +15,7 @@ type Props = {
   onWords: () => void
   onJumbled: () => void
   onCountries: () => void
+  onSpace: () => void
 }
 
 function MakerNote() {
@@ -36,6 +37,7 @@ export function Welcome({
   onWords,
   onJumbled,
   onCountries,
+  onSpace,
 }: Props) {
   const [draft, setDraft] = useState(name)
 
@@ -166,6 +168,19 @@ export function Welcome({
           <span>
             <span className="hub-title">Know the Countries</span>
             <span className="hub-blurb">Flags and maps!</span>
+          </span>
+        </button>
+        <button
+          type="button"
+          className="hub-card space"
+          onClick={() => pick(onSpace)}
+        >
+          <span className="hub-icon" aria-hidden="true">
+            🚀
+          </span>
+          <span>
+            <span className="hub-title">Space Explorer</span>
+            <span className="hub-blurb">Learn space facts, then quiz!</span>
           </span>
         </button>
       </div>

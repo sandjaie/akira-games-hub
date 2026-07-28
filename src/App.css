@@ -1378,3 +1378,252 @@
     transition: none;
   }
 }
+
+
+/* —— Space Explorer —— */
+
+.hub-card.space {
+  border-color: #845ef7;
+}
+
+.hub-card.space .hub-icon {
+  background: #e6dcff;
+}
+
+.space-art {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.space-art-label {
+  font-family: Nunito, sans-serif;
+  font-size: 9px;
+  font-weight: 800;
+  fill: #e7ecff;
+}
+
+.hub-art {
+  width: 64px;
+  height: 64px;
+  border-radius: 18px;
+}
+
+.hub-card.space-learn-card {
+  border-color: #4dabf7;
+}
+
+.hub-card.space-quiz-card {
+  border-color: #845ef7;
+}
+
+.mission-list {
+  display: grid;
+  gap: 0.7rem;
+  width: min(520px, 100%);
+  margin: 0.25rem auto 0;
+}
+
+.mission-card {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 0.85rem;
+  text-align: left;
+  background: var(--white);
+  color: var(--ink);
+  border: 3px solid #c9b8ff;
+  border-radius: var(--radius);
+  padding: 0.75rem 1rem;
+  box-shadow: var(--shadow);
+}
+
+.mission-emoji {
+  font-size: 1.9rem;
+  line-height: 1;
+}
+
+.mission-title {
+  display: block;
+  font-family: Fredoka, Nunito, sans-serif;
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.mission-blurb {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 700;
+  opacity: 0.75;
+}
+
+.mission-badge {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--sun);
+  min-width: 2.5rem;
+  text-align: right;
+}
+
+.learn-card {
+  width: min(460px, 100%);
+  margin: 0.25rem auto 0;
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 1rem 1.1rem 1.2rem;
+  box-shadow: var(--shadow);
+  text-align: center;
+  animation: scene-enter 0.3s ease;
+}
+
+.learn-art {
+  width: min(260px, 100%);
+  margin: 0 auto 0.75rem;
+}
+
+.learn-title {
+  font-family: Fredoka, Nunito, sans-serif;
+  font-size: clamp(1.2rem, 4.5vw, 1.5rem);
+  font-weight: 600;
+  margin: 0 0 0.5rem;
+}
+
+.learn-line {
+  margin: 0.35rem 0;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.learn-count {
+  text-align: center;
+  font-weight: 800;
+  color: var(--sky-deep);
+  margin: 0.6rem 0 0;
+}
+
+.learn-dots {
+  display: flex;
+  gap: 0.4rem;
+  justify-content: center;
+  margin-top: 0.2rem;
+}
+
+.learn-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #d3d8e0;
+}
+
+.learn-dot.on {
+  background: #845ef7;
+}
+
+.learn-actions {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: 0.9rem;
+}
+
+.space-mission-tag {
+  text-align: center;
+  margin: 0;
+}
+
+.space-prompt {
+  font-size: clamp(1.35rem, 4.6vw, 2rem);
+  text-align: center;
+  margin: 0.2rem 0 0.6rem;
+}
+
+.space-choices {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 0.75rem;
+  width: min(560px, 100%);
+  margin: 0 auto;
+}
+
+.space-choice {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0.6rem;
+  border-radius: 18px;
+  border: 3px solid #d8dce6;
+  background: var(--white);
+  color: var(--ink);
+  box-shadow: var(--shadow);
+}
+
+.choice-art {
+  width: 100%;
+}
+
+.choice-label {
+  font-family: Fredoka, Nunito, sans-serif;
+  font-size: 1.05rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.space-choice.correct {
+  border-color: #69db7c;
+  background: #e6faea;
+  opacity: 1;
+}
+
+.space-choice.wrong {
+  border-color: var(--coral);
+  background: #ffe9e4;
+  opacity: 1;
+}
+
+.space-reveal {
+  width: min(460px, 100%);
+  margin: 0.9rem auto 0;
+  padding: 0.9rem 1rem;
+  border-radius: 18px;
+  background: var(--white);
+  box-shadow: var(--shadow);
+  text-align: center;
+  display: grid;
+  gap: 0.5rem;
+  border: 3px solid transparent;
+  animation: scene-enter 0.3s ease;
+}
+
+.space-reveal.ok {
+  border-color: #69db7c;
+}
+
+.space-reveal.no {
+  border-color: var(--coral);
+}
+
+.space-feedback {
+  font-family: Fredoka, Nunito, sans-serif;
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.space-explain {
+  margin: 0;
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.screen.space-results {
+  justify-content: center;
+  text-align: center;
+  align-items: center;
+}
+
+.results-art {
+  width: min(180px, 50vw);
+  margin-bottom: 0.5rem;
+}

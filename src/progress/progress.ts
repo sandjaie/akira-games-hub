@@ -7,9 +7,12 @@ import type {
 import type { JumbledDifficulty } from '../content/jumbledWords'
 import { LAB_ORDER } from '../content/stations'
 import { WORD_LEVEL_ORDER, type WordLevelId } from '../content/wordLevels'
+import { MISSION_ORDER, type MissionId } from '../content/space'
+import type { SpaceStars } from '../space/quiz'
 import type {
   AppProgress,
   CountriesProgress,
+  SpaceProgress,
   JumbledProgress,
   LabProgress,
   LabStationId,
@@ -50,12 +53,20 @@ export function emptyCountriesProgress(): CountriesProgress {
   }
 }
 
+export function emptySpaceProgress(): SpaceProgress {
+  return {
+    learnedMissionIds: [],
+    bestStars: {},
+  }
+}
+
 export function emptyProgress(): AppProgress {
   return {
     lab: { completed: [] },
     words: emptyWordsProgress(),
     jumbled: emptyJumbledProgress(),
     countries: emptyCountriesProgress(),
+    space: emptySpaceProgress(),
   }
 }
 
@@ -101,6 +112,18 @@ function normalizeCountries(
   return { completedModes: completed, bestStars }
 }
 
+function normalizeSpace(raw: Partial<SpaceProgress> | undefined): SpaceProgress {
+  const learned = (raw?.learnedMissionIds ?? []).filter((id): id is MissionId =>
+    MISSION_ORDER.includes(id as MissionId),
+  )
+  const bestStars: SpaceProgress['bestStars'] = {}
+  for (const id of MISSION_ORDER) {
+    const stars = raw?.bestStars?.[id]
+    if (stars === 1 || stars === 2 || stars === 3) bestStars[id] = stars
+  }
+  return { learnedMissionIds: learned, bestStars }
+}
+
 export function loadProgress(): AppProgress {
   try {
     const raw = localStorage.getItem(KEY)
@@ -112,6 +135,7 @@ export function loadProgress(): AppProgress {
         words: emptyWordsProgress(),
         jumbled: emptyJumbledProgress(),
         countries: emptyCountriesProgress(),
+        space: emptySpaceProgress(),
       }
     }
     const lab = parsed.lab as LabProgress | undefined
@@ -123,6 +147,7 @@ export function loadProgress(): AppProgress {
       countries: normalizeCountries(
         parsed.countries as CountriesProgress | undefined,
       ),
+      space: normalizeSpace(parsed.space as SpaceProgress | undefined),
     }
   } catch {
     return emptyProgress()
@@ -226,4 +251,23 @@ export function recordCountriesRound(
     bestStars[key] = Math.max(prev, stars) as 1 | 2 | 3
   }
   return { completedModes, bestStars }
+}
+
+export function recordMissionLearned(
+  space: SpaceProgress,
+  id: MissionId,
+): SpaceProgress {
+  if (space.learnedMissionIds.includes(id)) return space
+  return { ...space, learnedMissionIds: [...space.learnedMissionIds, id] }
+}
+
+export function recordMissionQuiz(
+  space: SpaceProgress,
+  id: MissionId,
+  stars: SpaceStars,
+): SpaceProgress {
+  if (stars === 0) return space
+  const best = space.bestStars[id]
+  if (best && best >= stars) return space
+  return { ...space, bestStars: { ...space.bestStars, [id]: stars } }
 }
