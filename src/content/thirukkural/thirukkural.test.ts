@@ -57,4 +57,29 @@ describe('thirukkural content', () => {
     expect(getKural(1).meaningEn).toMatch(/alphabet/i)
     expect(getKural(11).meaningTa).toMatch(/மழை/)
   })
+
+  it('keeps English substitutions from breaking longer words', () => {
+    const blob = KURALS.map((k) => k.meaningEn).join('\n')
+    expect(blob).not.toMatch(/leaderdom/i)
+    expect(blob).not.toMatch(/goodnesss/i)
+    expect(blob).not.toMatch(/wopeople/i)
+    // kingdom must survive the king→leader swap
+    expect(getKural(445).meaningEn).toMatch(/kingdom/i)
+  })
+
+  it('applies age-safety across every book, not only Book III', () => {
+    for (const k of KURALS) {
+      expect(k.meaningEn).not.toMatch(/prostitut|harlot|courtesan|wanton|concubine|adulter/i)
+      expect(k.meaningTa).not.toMatch(/பாலியல்|விலைமகள்|விலைமகளிர்|பரத்தை/)
+    }
+    expect(getKural(911).meaningEn).toMatch(/sweet words/i)
+    expect(getKural(911).meaningTa).toMatch(/துன்பம்/)
+  })
+
+  it('does not end kid English on mid-clause fragments', () => {
+    for (const k of KURALS) {
+      expect(k.meaningEn).not.toMatch(/,\s*(?:and|or|who)\.$/i)
+      expect(k.meaningEn).not.toMatch(/\bwho\.$/i)
+    }
+  })
 })
