@@ -17,6 +17,7 @@ import { fetchTopicCards } from './factEngine'
 import { dayKey, freshFacts, moonPhaseForDay } from './spaceFacts'
 import { markSeen, pickFresh } from './seen'
 import { topicsFor } from './spaceTopics'
+import { MOON_FACTS, PLANET_FACTS } from './space/generatedFacts'
 
 const CACHE_KEY = 'space-today-v1'
 const TIMEOUT_MS = 4500
@@ -167,6 +168,23 @@ export async function loadTodayCards(now = new Date()): Promise<LearnCard[]> {
 /** Cards we can show instantly while the live ones are still loading. */
 export function todayCardsOffline(now = new Date()): LearnCard[] {
   return localCards(now)
+}
+
+/**
+ * Facts generated from Solar System OpenData, phrased by us. No network, so
+ * these show the instant a mission opens — the encyclopedia extras arrive after.
+ */
+const GENERATED: Partial<Record<MissionId, LearnCard[]>> = {
+  planets: PLANET_FACTS,
+  moon: MOON_FACTS,
+  'wow-facts': [...PLANET_FACTS, ...MOON_FACTS],
+}
+
+export function generatedFor(mission: MissionId, count = 3): LearnCard[] {
+  const pool = GENERATED[mission] ?? []
+  const picked = pickFresh(pool, count, (c) => `gen:${c.title}`)
+  for (const card of picked) markSeen(`gen:${card.title}`)
+  return picked
 }
 
 /**

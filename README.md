@@ -60,6 +60,29 @@ Jumbled Words uses curated local lists so every word keeps its exact picture clu
 
 Recently seen words are remembered for the browser tab session so the next round prefers new ones.
 
+## Generating space facts
+
+`src/content/space/generatedFacts.ts` holds 113 facts built from
+[Solar System OpenData](https://api.le-systeme-solaire.net/). To refresh it:
+
+```bash
+SSO_KEY=<your-key> node scripts/gen-space-facts.mjs
+```
+
+The key is read from the environment and **must not** be committed or moved to
+runtime — a bearer token in a Vite bundle is readable by anyone who opens
+devtools. Build time is safe because the data barely changes.
+
+The rule is the one `spaceLive.ts` already sets: **read numbers and names from
+the API, write the sentence ourselves.** Every fact is phrased by a template in
+the generator, so correctness comes from the source and reading level comes
+from us. Templates check before they speak — the source has no average
+temperature for Mercury and no radius for Haumea.
+
+Facts are interleaved by template rather than sorted by name, or the rotation
+hands a kid three "A day on ..." cards in a row. Planet facts go to Meet the
+Planets, moon facts to Moon Mission, and both to Amazing Space Facts.
+
 ## Flags and country data
 
 Flags mode covers **every UN member state** (194). Flag artwork comes from

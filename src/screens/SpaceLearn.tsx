@@ -5,6 +5,7 @@ import { getMission, type LearnCard, type MissionId } from '../content/space'
 import { SpaceArt } from '../content/space/SpaceArt'
 import { loadSpacePhoto } from '../content/space/spacePhotos'
 import {
+  generatedFor,
   loadMissionExtras,
   loadTodayCards,
   todayCardsOffline,
@@ -54,7 +55,9 @@ export function SpaceLearn({ missionId, onBack, onLearned, onQuiz }: Props) {
 
     // what we already have shows at once; new cards join when they arrive
     const base =
-      missionId === 'today' ? todayCardsOffline() : getMission(missionId).cards
+      missionId === 'today'
+        ? todayCardsOffline()
+        : [...getMission(missionId).cards, ...generatedFor(missionId)]
     setCards(base)
 
     const load =
