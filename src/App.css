@@ -1504,7 +1504,9 @@
 .learn-photo {
   display: block;
   aspect-ratio: 1 / 1;
-  object-fit: cover;
+  /* contain, not cover: Saturn's lead photo is 2.5:1 and cropping it square
+     cuts the rings off. Letterboxing onto the space navy suits the subject. */
+  object-fit: contain;
   border-radius: 16px;
   background: #151a3a;
   box-shadow: 0 3px 7px rgba(21, 26, 58, 0.3);

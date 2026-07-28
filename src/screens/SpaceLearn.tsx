@@ -3,6 +3,7 @@ import { playSfx, stopBgm } from '../audio/sounds'
 import { SoundToggle } from '../components/SoundToggle'
 import { getMission, type LearnCard, type MissionId } from '../content/space'
 import { SpaceArt } from '../content/space/SpaceArt'
+import { loadSpacePhoto } from '../content/space/spacePhotos'
 import {
   loadMissionExtras,
   loadTodayCards,
@@ -26,7 +27,22 @@ export function SpaceLearn({ missionId, onBack, onLearned, onQuiz }: Props) {
   const last = index >= cards.length - 1
   // remember the photo that failed, not a bare flag, so the next card retries
   const [brokenPhoto, setBrokenPhoto] = useState<string | null>(null)
-  const photo = card.photo && card.photo !== brokenPhoto ? card.photo : null
+  // fetched cards bring their own picture; curated ones look one up by art kind
+  const [artPhoto, setArtPhoto] = useState<string | null>(null)
+  const candidate = card.photo ?? artPhoto
+  const photo = candidate && candidate !== brokenPhoto ? candidate : null
+
+  useEffect(() => {
+    setArtPhoto(null)
+    if (card.photo) return
+    let cancelled = false
+    void loadSpacePhoto(card.art).then((src) => {
+      if (!cancelled) setArtPhoto(src)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [card.art, card.photo])
 
   useEffect(() => {
     stopBgm()
