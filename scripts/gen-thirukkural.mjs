@@ -418,61 +418,84 @@ function cleanTamil(raw) {
 }
 
 /**
- * Prefer a finished sentence. Never let a trailing space win over `. ` /
- * `! ` / `? `, which left fragments like "good persons, and."
+ * Prefer a finished sentence. Always retreat to a word boundary — never keep
+ * a raw character slice (that produced endings like "goo." / "வேண.").
  */
 function looksDangling(s) {
-  return /(?:,|;|:)?\s*\b(?:who|and|or|the|a|an|to|of|for|with|by|from|in|on|at|as|is|are|was|were|that|which|their|his|her|its)\.?$/i.test(
+  return /(?:,|;|:)?\s*\b(?:who|and|or|the|a|an|to|of|for|with|by|from|in|on|at|as|is|are|was|were|that|which|their|his|her|its|those|these|them)\.?$/i.test(
     s.trim(),
   )
+}
+
+function atWordBoundary(cut) {
+  const trimmed = cut.replace(/\s+/g, ' ').trim()
+  if (!trimmed) return null
+  // If the slice already ends on a full token (no partial word at the limit),
+  // keep it; otherwise drop the incomplete trailing token.
+  const lastSpace = trimmed.lastIndexOf(' ')
+  if (lastSpace <= 40) return null
+  return trimmed.slice(0, lastSpace).trim()
+}
+
+function stripTrailingGlue(text) {
+  let soft = text.replace(/\s+/g, ' ').trim()
+  for (let i = 0; i < 10; i++) {
+    const next = soft
+      .replace(/[,:;.\-–—]+$/g, '')
+      .replace(
+        /\b(?:and|or|the|a|an|to|of|for|with|by|from|in|on|at|as|who|which|that|their|his|her|its|is|are|was|were|those|these|them)\s*$/i,
+        '',
+      )
+      .trim()
+    if (next === soft) break
+    soft = next
+  }
+  return soft
 }
 
 function shortenToSentence(s, maxLen, fallback) {
   if (!s || s.length <= maxLen) return s
 
-  const tryCut = (cut) => {
+  const tryCut = (source) => {
+    const cut = source.slice(0, maxLen)
     const ends = ['. ', '! ', '? '].map((m) => cut.lastIndexOf(m))
     const sentenceEnd = Math.max(...ends)
     if (sentenceEnd > 40) return cut.slice(0, sentenceEnd + 1).trim()
 
     const semi = cut.lastIndexOf('; ')
     if (semi > 40) {
-      const piece = `${cut.slice(0, semi).trim()}.`
-      if (!looksDangling(piece.slice(0, -1))) return piece
+      const piece = stripTrailingGlue(cut.slice(0, semi))
+      if (piece.length > 40 && !looksDangling(piece)) return `${piece}.`
     }
 
-    let soft = cut.replace(/\s+/g, ' ').trim()
-    // Keep stripping trailing glue words / commas until the clause can stand alone.
-    for (let i = 0; i < 8; i++) {
-      const next = soft
-        .replace(/[,:;.\-–—]+$/g, '')
-        .replace(
-          /\b(?:and|or|the|a|an|to|of|for|with|by|from|in|on|at|as|who|which|that|their|his|her|its|is|are|was|were)\s*$/i,
-          '',
-        )
-        .trim()
-      if (next === soft) break
-      soft = next
-    }
-    if (soft.length > 40 && !looksDangling(soft)) return soft
+    // Always cut on a space — never accept the raw character slice.
+    const bounded = atWordBoundary(cut)
+    if (!bounded) return null
+    const soft = stripTrailingGlue(bounded)
+    if (soft.length > 40) return soft
     return null
   }
 
-  const fromPrimary = tryCut(s.slice(0, maxLen))
+  const fromPrimary = tryCut(s)
   if (fromPrimary) return fromPrimary
 
   if (fallback && fallback !== s) {
-    if (fallback.length <= maxLen && !looksDangling(fallback.replace(/[.!?]$/, ''))) {
-      return fallback
+    if (fallback.length <= maxLen) {
+      const whole = stripTrailingGlue(fallback.replace(/[.!?]+$/, ''))
+      if (whole.length > 20 && !looksDangling(whole)) {
+        return /[.!?]$/.test(fallback) ? fallback.trim() : `${whole}.`
+      }
     }
-    const fromFallback = tryCut(fallback.slice(0, maxLen))
+    const fromFallback = tryCut(fallback)
     if (fromFallback) return fromFallback
   }
 
-  // Absolute last resort: first clause-ish chunk without dangling tail.
-  const rough = s.slice(0, Math.min(maxLen, 90)).trim()
-  const rescued = tryCut(rough)
-  return rescued || rough
+  // Last resort: shorter window, still word-bounded.
+  const shortWindow = tryCut(s.slice(0, Math.min(maxLen, 100)))
+  if (shortWindow) return shortWindow
+  const words = s.split(/\s+/).filter(Boolean)
+  const take = Math.max(8, Math.min(words.length, 14))
+  return words.slice(0, take).join(' ')
 }
 
 function pickTamilMeaning(k, number) {
@@ -729,10 +752,14 @@ const FORBIDDEN_EN = [
   /\bsexual\b/i,
   /\blovers?\b/i,
   /\bembrace\b/i,
-  // Mid-clause cuts that used to ship: "good persons, and." / "savages who."
+  // Mid-clause cuts: "good persons, and." / "savages who."
   /,\s*(?:and|or|who|the|a|an|to|of)\.$/i,
   /\b(?:people who fight you|murderous savages)\s+who\.$/i,
   /\bwho\.$/i,
+  // Character-slice stubs: space + lone letter + period (e.g. "who h.")
+  // Avoid matching the "t." in "can't."
+  /\s[b-hj-zB-HJ-Z]\.$/,
+  /\bgoo\.$/i,
 ]
 
 const FORBIDDEN_TA = [
@@ -743,6 +770,8 @@ const FORBIDDEN_TA = [
   /காமம்/,
   /காதல் நுகர்ச்சி/,
   /மார்பகம்/,
+  // Mid-word Tamil stubs: "வேண." from வேண்டும்
+  /\sவேண\.$/,
 ]
 
 function assertKidSafe(kurals) {
@@ -756,7 +785,7 @@ function assertKidSafe(kurals) {
     }
   }
   if (fails.length) {
-    throw new Error(`kid-safety check failed:\n${fails.slice(0, 20).join('\n')}`)
+    throw new Error(`kid-safety check failed:\n${fails.slice(0, 30).join('\n')}`)
   }
 }
 

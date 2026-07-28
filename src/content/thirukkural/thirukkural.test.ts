@@ -71,7 +71,7 @@ describe('thirukkural content', () => {
     expect(blob).not.toMatch(/goodnesss/i)
     expect(blob).not.toMatch(/wopeople/i)
     // kingdom must survive the king→leader swap
-    expect(getKural(445).meaningEn).toMatch(/kingdom/i)
+    expect(getKural(734).meaningEn).toMatch(/kingdom/i)
   })
 
   it('applies age-safety across the shipped dataset', () => {
@@ -90,5 +90,18 @@ describe('thirukkural content', () => {
       expect(k.meaningEn).not.toMatch(/,\s*(?:and|or|who)\.$/i)
       expect(k.meaningEn).not.toMatch(/\bwho\.$/i)
     }
+  })
+
+  it('does not cut meanings mid-word', () => {
+    for (const k of KURALS) {
+      // Lone-letter stubs like " h." — not the "t." in "can't."
+      expect(k.meaningEn).not.toMatch(/\s[b-hj-zB-HJ-Z]\.$/)
+      expect(k.meaningEn).not.toMatch(/\bgoo\.$/i)
+      expect(k.meaningTa).not.toMatch(/\sவேண\.$/)
+    }
+    // Codex examples that used to ship truncated
+    expect(getKural(157).meaningEn).not.toMatch(/goo\.$/i)
+    expect(getKural(276).meaningEn).not.toMatch(/\sh\.$/i)
+    expect(getKural(638).meaningTa).not.toMatch(/வேண\.$/)
   })
 })
