@@ -84,12 +84,21 @@ every time an API deprecates a version — REST Countries v3.1 now returns an
 error and v5 requires an API key, which a browser-only app cannot keep secret
 anyway (`VITE_*` values are inlined into the bundle).
 
-The twelve original countries keep their hand-written kid facts and their
-hand-drawn SVG flags, which are also the offline fallback if the CDN is
-unreachable. Everything else gets its capital city as the fact — always true,
-always the right reading level.
+Nothing in this game is hand-written content any more. The reveal card shows
+continent, subregion and capital from the generated data, then trivia fetched
+from **Simple English Wikipedia** at reveal time — the country page for what it
+is known for, and `Flag of X` for what the colours mean. Results are cached in
+`localStorage`, and a country with nothing usable just shows its capital.
 
-Maps mode stays on those twelve: each board and hotspot is hand-drawn.
+Two filters sit in front of that text (`src/content/countryFacts.ts`). The
+readability filter is the one the space cards use, relaxed so a country's own
+name can exceed the word-length cap — otherwise "Liechtenstein is a country in
+Europe." gets thrown away. The second drops sentences a six-year-old does not
+need on a reward screen: encyclopedias are neutral, not age-graded, so the same
+paragraph that names a capital will name an invasion.
+
+Maps mode still runs on twelve countries: board membership is a design choice
+(four per continent) that `scripts/gen-map-paths.mjs` draws to match.
 
 ## Space Explorer content, and how it stays fresh
 

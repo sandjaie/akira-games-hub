@@ -1257,6 +1257,12 @@
   font-weight: 700;
 }
 
+.countries-capital {
+  margin: 0.15rem 0 0.4rem;
+  font-weight: 700;
+  opacity: 0.75;
+}
+
 .countries-fact {
   margin: 0;
   line-height: 1.35;

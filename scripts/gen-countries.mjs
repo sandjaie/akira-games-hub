@@ -51,6 +51,8 @@ const rows = raw
     code: c.cca2.toLowerCase(),
     name: c.name.common,
     continent: continentOf(c),
+    // "Asia · Central Asia" reads better than "Asia" alone on the reveal card
+    subregion: c.subregion ?? '',
     capital: c.capital?.[0] ?? '',
     tier: EASY.has(c.cca2.toLowerCase()) ? 1 : 2,
   }))
@@ -67,7 +69,9 @@ const body = rows
     (r) =>
       `  { code: '${r.code}', name: ${JSON.stringify(r.name)}, continent: '${
         r.continent
-      }', capital: ${JSON.stringify(r.capital)}, tier: ${r.tier} },`,
+      }', subregion: ${JSON.stringify(r.subregion)}, capital: ${JSON.stringify(
+        r.capital,
+      )}, tier: ${r.tier} },`,
   )
   .join('\n')
 
@@ -81,6 +85,8 @@ export type WorldCountry = {
   code: string
   name: string
   continent: Continent
+  /** e.g. "Central Asia" — narrower than the continent, shown next to it. */
+  subregion: string
   capital: string
   /** 1 = a child is likely to know it (Easy), 2 = wider world (Medium). */
   tier: 1 | 2

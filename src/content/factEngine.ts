@@ -79,7 +79,12 @@ export function splitSentences(extract: string): string[] {
     .filter(Boolean)
 }
 
-export function isKidReadable(sentence: string): boolean {
+/**
+ * `allow` exempts words from the length cap — a country's own name is a word a
+ * kid is being taught, so "Liechtenstein is a country in Europe." must survive
+ * a filter that otherwise rejects anything over twelve letters.
+ */
+export function isKidReadable(sentence: string, allow: string[] = []): boolean {
   const lower = sentence.toLowerCase()
   if (JARGON.some((word) => lower.includes(word))) return false
   if (/[();:×^~≈…]/.test(sentence)) return false
@@ -87,9 +92,14 @@ export function isKidReadable(sentence: string): boolean {
   if (/\d+(\.\d+)?\s*(gm|au|km\/s|mi|ly)\b/i.test(sentence)) return false
   const words = sentence.split(/\s+/)
   if (words.length < MIN_WORDS || words.length > MAX_WORDS) return false
-  if (words.some((w) => w.replace(/[^A-Za-z-]/g, '').length > MAX_WORD_LENGTH)) {
-    return false
-  }
+  const spared = new Set(
+    allow.flatMap((phrase) => phrase.toLowerCase().split(/\s+/)),
+  )
+  const tooLong = words.some((w) => {
+    const bare = w.replace(/[^A-Za-z-]/g, '')
+    return bare.length > MAX_WORD_LENGTH && !spared.has(bare.toLowerCase())
+  })
+  if (tooLong) return false
   return /[.!?]$/.test(sentence)
 }
 
@@ -151,7 +161,9 @@ export function toKidCard(
   extract: string,
   thumb?: WikiThumb,
 ): LearnCard | null {
-  const usable = splitSentences(extract).filter(isKidReadable).slice(0, 2)
+  const usable = splitSentences(extract)
+    .filter((line) => isKidReadable(line))
+    .slice(0, 2)
   if (usable.length === 0) return null
   return {
     art: artForText(`${topic.page} ${usable.join(' ')}`, topic.art),

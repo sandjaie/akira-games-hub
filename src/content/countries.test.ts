@@ -1,21 +1,20 @@
 import { describe, expect, it } from 'vitest'
 import {
-  COUNTRIES,
   COUNTRY_ORDER,
+  MAP_BOARD_OF,
   MAP_BOARD_REGIONS,
   ROUND_SIZE,
   getInfo,
 } from './countries'
 
 describe('countries content', () => {
-  it('has twelve curated countries', () => {
+  it('gives every map country a board and a resolvable country', () => {
     expect(COUNTRY_ORDER).toHaveLength(12)
     for (const id of COUNTRY_ORDER) {
-      const c = COUNTRIES[id]
-      expect(c.id).toBe(id)
-      expect(c.name.length).toBeGreaterThan(2)
-      expect(c.fact.length).toBeGreaterThan(10)
-      expect(c.mapBoard).toBeTruthy()
+      expect(MAP_BOARD_OF[id]).toBeTruthy()
+      const info = getInfo(id)
+      expect(info.name.length).toBeGreaterThan(2)
+      expect(info.capital.length).toBeGreaterThan(1)
     }
   })
 
@@ -31,19 +30,25 @@ describe('countries content', () => {
 })
 
 describe('getInfo', () => {
-  it('keeps the hand-written fact whether asked by slug or by code', () => {
+  it('resolves a map slug and an ISO code to the same country', () => {
     const bySlug = getInfo('australia')
     const byCode = getInfo('au')
-    expect(bySlug.fact).toBe(COUNTRIES.australia.fact)
-    expect(byCode.fact).toBe(COUNTRIES.australia.fact)
+    expect(bySlug).toEqual(byCode)
     expect(byCode.name).toBe('Australia')
     expect(byCode.code).toBe('au')
+    expect(byCode.continent).toBe('Oceania')
   })
 
-  it('falls back to the capital for countries with no written fact', () => {
+  it('carries the capital and subregion the reveal card shows', () => {
     const peru = getInfo('pe')
     expect(peru.name).toBe('Peru')
     expect(peru.continent).toBe('South America')
-    expect(peru.fact).toBe('Lima is the capital of Peru.')
+    expect(peru.capital).toBe('Lima')
+    expect(peru.subregion).toBe('South America')
+  })
+
+  it('resolves map-only hotspots too', () => {
+    expect(getInfo('spain').name).toBe('Spain')
+    expect(getInfo('mexico').capital).toBe('Mexico City')
   })
 })

@@ -1,8 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import {
-  COUNTRIES,
   COUNTRY_ORDER,
-  CURATED_CODES,
   continentOfCode,
   flagPool,
 } from '../content/countries'
@@ -38,24 +36,22 @@ describe('starsFromScore', () => {
 })
 
 describe('flag distractors', () => {
-  it('prefers the look-alike flags the curated set calls out', () => {
-    const pool = flagPool('medium')
-    const picks = pickFlagDistractors('fr', pool, 3, () => 0)
-    expect(picks).toHaveLength(3)
-    expect(picks).not.toContain('fr')
-    const similar = COUNTRIES.france.similarFlagIds.map((id) => CURATED_CODES[id])
-    expect(picks).toEqual(expect.arrayContaining(similar))
-  })
-
-  it('falls back to the same continent before anywhere else', () => {
+  it('draws wrong answers from the same continent first', () => {
     const picks = pickFlagDistractors('pe', flagPool('medium'), 3, () => 0)
     expect(picks).toHaveLength(3)
-    // Peru has no curated look-alikes, so all three should be South American
+    expect(picks).not.toContain('pe')
     expect(picks.map(continentOfCode)).toEqual([
       'South America',
       'South America',
       'South America',
     ])
+  })
+
+  it('falls back past the continent when it runs out', () => {
+    // Oceania has few countries in the Easy pool, so it must reach further
+    const picks = pickFlagDistractors('au', flagPool('easy'), 3, () => 0)
+    expect(picks).toHaveLength(3)
+    expect(picks).not.toContain('au')
   })
 
   it('easy flag questions use three choices', () => {

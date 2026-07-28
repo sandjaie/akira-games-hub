@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { playSfx, stopBgm } from '../audio/sounds'
 import { SoundToggle } from '../components/SoundToggle'
 import { getInfo, type MapRegionId } from '../content/countries'
+import { loadCountryFacts, type CountryFacts } from '../content/countryFacts'
 import { Flag } from '../content/flags/Flag'
 import { ContinentMap } from '../content/maps/ContinentMap'
 import {
@@ -42,6 +43,21 @@ export function CountriesPlay({
   const [wasCorrect, setWasCorrect] = useState(false)
 
   const country = getInfo(question.countryId)
+  const [facts, setFacts] = useState<CountryFacts>({ about: [] })
+
+  // fetched while the question is still on screen, so the reveal has it ready
+  useEffect(() => {
+    setFacts({ about: [] })
+    let cancelled = false
+    void loadCountryFacts(country.code, country.name, country.capital).then(
+      (next) => {
+        if (!cancelled) setFacts(next)
+      },
+    )
+    return () => {
+      cancelled = true
+    }
+  }, [country.code, country.name, country.capital])
 
   useEffect(() => {
     stopBgm()
@@ -204,8 +220,19 @@ export function CountriesPlay({
           </p>
           <p className="countries-meta">
             <strong>{country.name}</strong> · {country.continent}
+            {country.subregion && country.subregion !== country.continent
+              ? ` · ${country.subregion}`
+              : ''}
           </p>
-          <p className="countries-fact">{country.fact}</p>
+          {country.capital ? (
+            <p className="countries-capital">Capital: {country.capital}</p>
+          ) : null}
+          {facts.flag ? <p className="countries-fact">{facts.flag}</p> : null}
+          {facts.about.map((line) => (
+            <p key={line} className="countries-fact">
+              {line}
+            </p>
+          ))}
           <p className="countries-score-live" aria-hidden="true">
             Score {score} / {asked}
           </p>

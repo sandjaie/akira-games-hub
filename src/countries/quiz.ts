@@ -1,9 +1,9 @@
 import {
-  COUNTRIES,
   COUNTRY_ORDER,
-  CURATED_CODES,
   continentOfCode,
   flagPool,
+  isMapCountry,
+  MAP_BOARD_OF,
   MAP_BOARD_REGIONS,
   ROUND_SIZE,
   type CountryId,
@@ -82,18 +82,9 @@ function otherCountryIds(exclude: CountryId): CountryId[] {
   return COUNTRY_ORDER.filter((id) => id !== exclude)
 }
 
-/** Flags the curated set calls out as look-alikes, as ISO codes. */
-function similarCodes(code: string): string[] {
-  const curated = Object.values(COUNTRIES).find(
-    (c) => CURATED_CODES[c.id] === code,
-  )
-  return (curated?.similarFlagIds ?? []).map((id) => CURATED_CODES[id])
-}
-
 /**
- * Look-alike flags first, then the same continent, then anywhere. Same-continent
- * wrong answers are the ones worth thinking about; a random far-flung country
- * gives the answer away.
+ * Same continent first, then anywhere. Same-continent wrong answers are the
+ * ones worth thinking about; a random far-flung country gives the answer away.
  */
 export function pickFlagDistractors(
   code: string,
@@ -102,19 +93,10 @@ export function pickFlagDistractors(
   random: () => number = Math.random,
 ): string[] {
   const others = pool.filter((c) => c !== code)
-  const similar = similarCodes(code).filter((c) => others.includes(c))
   const continent = continentOfCode(code)
-  const near = others.filter(
-    (c) => !similar.includes(c) && continentOfCode(c) === continent,
-  )
-  const far = others.filter(
-    (c) => !similar.includes(c) && !near.includes(c),
-  )
-  return [
-    ...shuffle(similar, random),
-    ...shuffle(near, random),
-    ...shuffle(far, random),
-  ].slice(0, count)
+  const near = others.filter((c) => continentOfCode(c) === continent)
+  const far = others.filter((c) => continentOfCode(c) !== continent)
+  return [...shuffle(near, random), ...shuffle(far, random)].slice(0, count)
 }
 
 export function buildFlagQuestion(
@@ -133,10 +115,9 @@ export function buildMapsEasyQuestion(
   countryId: CountryId,
   random: () => number = Math.random,
 ): MapsEasyQuestion {
-  const country = COUNTRIES[countryId]
-  const board = country.mapBoard
+  const board = MAP_BOARD_OF[countryId]
   const sameBoard = MAP_BOARD_REGIONS[board].filter(
-    (id): id is CountryId => id in COUNTRIES && id !== countryId,
+    (id): id is CountryId => isMapCountry(id) && id !== countryId,
   )
   const rest = otherCountryIds(countryId).filter((id) => !sameBoard.includes(id))
   const distractors = [
@@ -156,8 +137,7 @@ export function buildMapsEasyQuestion(
 export function buildMapsMediumQuestion(
   countryId: CountryId,
 ): MapsMediumQuestion {
-  const country = COUNTRIES[countryId]
-  const board = country.mapBoard
+  const board = MAP_BOARD_OF[countryId]
   const hotspots = MAP_BOARD_REGIONS[board]
   return {
     kind: 'maps-medium',
