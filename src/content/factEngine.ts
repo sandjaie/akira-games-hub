@@ -12,49 +12,13 @@
  */
 import type { LearnCard } from './space'
 import type { SpaceArtKind } from './space/SpaceArt'
+import kidFilters from './kidFilters.json'
 
 const WIKI = 'https://simple.wikipedia.org/api/rest_v1/page/summary/'
 const TIMEOUT_MS = 4500
 
 /** Words that mean the sentence is for grown-ups, not a six-year-old. */
-const JARGON = [
-  'astronomical unit',
-  'hydrostatic',
-  'eccentric',
-  'ecliptic',
-  'magnitude',
-  'dark matter',
-  'subtype',
-  'infrared',
-  'ultraviolet',
-  'radio wave',
-  'spectrum',
-  'droplet',
-  'minor planet',
-  'natural satellite',
-  'perihelion',
-  'aphelion',
-  'nuclear fusion',
-  'plasma',
-  'photosphere',
-  'terrestrial',
-  'refract',
-  'diffract',
-  'wavelength',
-  'axial tilt',
-  'retrograde',
-  'differentiat',
-  'composition',
-  'approximately',
-  'respectively',
-  'designation',
-  'classificat',
-  'observator',
-  'hypothes',
-  'kilogram',
-  'density',
-  'mass of',
-]
+const JARGON = kidFilters.jargon
 
 const MAX_WORDS = 20
 const MIN_WORDS = 5

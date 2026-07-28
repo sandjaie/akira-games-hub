@@ -9,6 +9,7 @@
  * card still shows continent and capital from the baked-in data.
  */
 import { isKidReadable, splitSentences } from './factEngine'
+import kidFilters from './kidFilters.json'
 
 const WIKI = 'https://simple.wikipedia.org/api/rest_v1/page/summary/'
 const TIMEOUT_MS = 4500
@@ -63,8 +64,7 @@ async function summary(page: string): Promise<string | null> {
  * Encyclopedias are neutral, not age-graded: the same paragraph that names a
  * capital will name an invasion. This drops the sentence, not the country.
  */
-const NOT_FOR_KIDS =
-  /\b(war|wars|invad|invasion|genocide|massacre|killed|deaths?|dead|famine|slaver?y|slaves?|dictator|regime|coup|terroris|refugee|weapon|nuclear|army|armies|military|troops|conflict|rebel|execut|assassinat|colonial|colonis|coloniz|empire|beer|wine|alcohol|drugs?|crime|prison|poverty|disease|epidemic|pandemic)/i
+const NOT_FOR_KIDS = new RegExp(kidFilters.notForKids, 'i')
 
 /** Readable sentences, minus the ones that only restate what the card shows. */
 export function usableLines(

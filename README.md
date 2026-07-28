@@ -97,6 +97,39 @@ instead.
 Planet facts go to Meet the Planets, moon facts to Moon Mission, rock facts to
 Space Rocks, and all three to Amazing Space Facts.
 
+## Generating sky and star facts
+
+`src/content/space/wikiFacts.ts` holds 141 cards crawled from Simple English
+Wikipedia categories. To refresh:
+
+```bash
+node scripts/gen-wiki-facts.mjs
+```
+
+This is the only source Sky Science, Deep Space and Sun and Stars have — no
+solar system database explains why the sky is blue. Summaries are cached under
+`.cache/` (gitignored), so a re-run with different filters costs nothing.
+
+**Build time, not runtime.** Wikipedia 429s at better than one request a second
+and this crawl takes minutes with backoff; a child opening a mission must never
+wait on that.
+
+Four gates stand between a category and a card, because **readable is not the
+same as worth knowing** — the readability filter happily passed a free-electron
+laser into Sky Science:
+
+1. **Title gate**, before spending a fetch — digits, `List of...`, single proper
+   nouns outside a core-concept list, variable-star designations (`AG Carinae`),
+   stars named after their discoverer.
+2. **Readability**, shared with the runtime engine via `kidFilters.json`.
+3. **Relevance**, per section — `Category:Light` is a physics-lab category.
+4. **Emptiness** — fifteen nebula pages whose entire card was a distance in
+   light-years, and astronaut pages that are interchangeable biography openers.
+
+What no rule catches is named explicitly in `REJECT`. That list is the honest
+part: when a rule cannot express "a six-year-old does not need this", somebody
+has to sign off on a name.
+
 ## Flags and country data
 
 Flags mode covers **every UN member state** (194). Flag artwork comes from

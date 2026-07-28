@@ -26,3 +26,6 @@ dist-ssr
 *.sln
 *.sw?
 .vercel
+
+# build-time crawl cache (scripts/gen-wiki-facts.mjs)
+.cache/

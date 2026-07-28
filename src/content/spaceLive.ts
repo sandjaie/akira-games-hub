@@ -18,6 +18,7 @@ import { dayKey, freshFacts, moonPhaseForDay } from './spaceFacts'
 import { markSeen, pickFresh } from './seen'
 import { topicsFor } from './spaceTopics'
 import { MOON_FACTS, PLANET_FACTS, ROCK_FACTS } from './space/generatedFacts'
+import { WIKI_FACTS } from './space/wikiFacts'
 
 const CACHE_KEY = 'space-today-v1'
 const TIMEOUT_MS = 4500
@@ -178,12 +179,29 @@ export function todayCardsOffline(now = new Date()): LearnCard[] {
  * make each visit different, not to make one visit long. A six-year-old clicking
  * Next twenty times has stopped learning somewhere around ten.
  */
-const GENERATED: Partial<Record<MissionId, LearnCard[]>> = {
+const SOLAR: Partial<Record<MissionId, LearnCard[]>> = {
   planets: PLANET_FACTS,
   moon: MOON_FACTS,
   'space-rocks': ROCK_FACTS,
   'wow-facts': [...PLANET_FACTS, ...MOON_FACTS, ...ROCK_FACTS],
 }
+
+/**
+ * Solar-system numbers plus the Wikipedia crawl. Sky Science, Deep Space and
+ * Sun and Stars only have the crawl — no database explains why the sky is blue.
+ */
+const GENERATED: Partial<Record<MissionId, LearnCard[]>> = Object.fromEntries(
+  (Object.keys({ ...SOLAR, ...WIKI_FACTS }) as MissionId[]).map((id) => [
+    id,
+    [...(SOLAR[id] ?? []), ...(WIKI_FACTS[id] ?? [])],
+  ]),
+)
+
+// Amazing Space Facts is the everything mission
+GENERATED['wow-facts'] = [
+  ...(SOLAR['wow-facts'] ?? []),
+  ...Object.values(WIKI_FACTS).flat(),
+]
 
 export function generatedFor(mission: MissionId, count = 6): LearnCard[] {
   const pool = GENERATED[mission] ?? []
