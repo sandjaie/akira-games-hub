@@ -31,9 +31,16 @@ function write(map: SeenMap): void {
   }
 }
 
-export function markSeen(key: string, at = Date.now()): void {
+/**
+ * `at` is an ordering token that is normally the clock. Left unset it always
+ * lands after everything already stored: Date.now() repeats inside the same
+ * millisecond, and two items marked in one tick would otherwise tie and the
+ * rotation would collapse — which is what a fast tapper, or a loop marking a
+ * batch of cards, actually does.
+ */
+export function markSeen(key: string, at?: number): void {
   const map = read()
-  map[key] = at
+  map[key] = at ?? Math.max(Date.now(), ...Object.values(map).map((n) => n + 1))
   write(map)
 }
 
@@ -59,6 +66,12 @@ export function pickFresh<T>(
     }))
     .sort((a, b) => a.seen - b.seen || a.index - b.index)
   return ranked.slice(0, count).map((r) => r.item)
+}
+
+/** Items never shown yet, in list order. */
+export function unseen<T>(items: T[], key: (item: T) => string): T[] {
+  const map = read()
+  return items.filter((item) => !map[key(item)])
 }
 
 export function clearSeen(): void {

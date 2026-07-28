@@ -1,9 +1,11 @@
-import { describe, expect, it } from 'vitest'
-import { COUNTRIES, ROUND_SIZE } from '../content/countries'
+import { beforeEach, describe, expect, it } from 'vitest'
+import { COUNTRIES, COUNTRY_ORDER, ROUND_SIZE } from '../content/countries'
+import { clearSeen } from '../content/seen'
 import {
   buildFlagQuestion,
   buildMapsEasyQuestion,
   buildMapsMediumQuestion,
+  buildQuestion,
   buildRound,
   isCorrectChoice,
   modeKey,
@@ -95,5 +97,42 @@ describe('modeKey', () => {
   it('joins mode and difficulty', () => {
     expect(modeKey('flags', 'easy')).toBe('flags-easy')
     expect(modeKey('maps', 'medium')).toBe('maps-medium')
+  })
+})
+
+describe('buildQuestion rotation', () => {
+  beforeEach(() => {
+    clearSeen()
+  })
+
+  it('asks every country once before repeating any', () => {
+    const asked = Array.from({ length: COUNTRY_ORDER.length }, () =>
+      buildQuestion('flags', 'easy').countryId,
+    )
+    expect(new Set(asked).size).toBe(COUNTRY_ORDER.length)
+  })
+
+  it('does not bring a country back for most of the next lap', () => {
+    const asked = Array.from({ length: COUNTRY_ORDER.length * 2 }, () =>
+      buildQuestion('flags', 'easy').countryId,
+    )
+    // gap between two askings of the same country, in questions
+    const lastAt = new Map<string, number>()
+    let closest = Infinity
+    asked.forEach((id, at) => {
+      const prev = lastAt.get(id)
+      if (prev !== undefined) closest = Math.min(closest, at - prev)
+      lastAt.set(id, at)
+    })
+    expect(closest).toBeGreaterThanOrEqual(COUNTRY_ORDER.length / 2)
+  })
+
+  it('rotates flags and maps independently', () => {
+    const flags = buildQuestion('flags', 'easy').countryId
+    const seenByMaps = Array.from({ length: COUNTRY_ORDER.length }, () =>
+      buildQuestion('maps', 'easy').countryId,
+    )
+    // the maps lap still covers everything, including what flags just asked
+    expect(seenByMaps).toContain(flags)
   })
 })

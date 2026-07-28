@@ -8,6 +8,7 @@ import {
   type MapBoardId,
   type MapRegionId,
 } from '../content/countries'
+import { markSeen, pickFresh, unseen } from '../content/seen'
 
 export type CountriesMode = 'flags' | 'maps'
 export type CountriesDifficulty = 'easy' | 'medium'
@@ -147,6 +148,20 @@ export function buildMapsMediumQuestion(
   }
 }
 
+/** Flags and maps rotate separately: knowing a flag is not knowing the map. */
+function seenKey(mode: CountriesMode, id: CountryId): string {
+  return `country:${mode}:${id}`
+}
+
+/**
+ * Once every country has been asked, choose between this many of the
+ * longest-ago ones. Random inside a window keeps the order unpredictable; a
+ * window of 1 would be a fixed carousel, the whole pool the old clumpy random.
+ */
+function freshWindow(poolSize: number): number {
+  return Math.max(2, Math.ceil(poolSize / 3))
+}
+
 /** One question at a time — play runs until the kid stops. */
 export function buildQuestion(
   mode: CountriesMode,
@@ -155,7 +170,14 @@ export function buildQuestion(
   random: () => number = Math.random,
 ): CountriesQuestion {
   const pool = COUNTRY_ORDER.filter((id) => id !== avoid)
-  const id = pool[Math.floor(random() * pool.length)]
+  const key = (id: CountryId) => seenKey(mode, id)
+  // anything never asked comes first, so a lap covers every country before
+  // any of them comes round again
+  const never = unseen(pool, key)
+  const candidates =
+    never.length > 0 ? never : pickFresh(pool, freshWindow(pool.length), key)
+  const id = candidates[Math.floor(random() * candidates.length)]
+  markSeen(seenKey(mode, id))
   if (mode === 'flags') return buildFlagQuestion(id, difficulty, random)
   if (difficulty === 'easy') return buildMapsEasyQuestion(id, random)
   return buildMapsMediumQuestion(id)
