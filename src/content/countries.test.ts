@@ -4,6 +4,7 @@ import {
   COUNTRY_ORDER,
   MAP_BOARD_REGIONS,
   ROUND_SIZE,
+  getInfo,
 } from './countries'
 
 describe('countries content', () => {
@@ -26,5 +27,23 @@ describe('countries content', () => {
 
   it('round size is five', () => {
     expect(ROUND_SIZE).toBe(5)
+  })
+})
+
+describe('getInfo', () => {
+  it('keeps the hand-written fact whether asked by slug or by code', () => {
+    const bySlug = getInfo('australia')
+    const byCode = getInfo('au')
+    expect(bySlug.fact).toBe(COUNTRIES.australia.fact)
+    expect(byCode.fact).toBe(COUNTRIES.australia.fact)
+    expect(byCode.name).toBe('Australia')
+    expect(byCode.code).toBe('au')
+  })
+
+  it('falls back to the capital for countries with no written fact', () => {
+    const peru = getInfo('pe')
+    expect(peru.name).toBe('Peru')
+    expect(peru.continent).toBe('South America')
+    expect(peru.fact).toBe('Lima is the capital of Peru.')
   })
 })

@@ -1,16 +1,19 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { COUNTRIES, COUNTRY_ORDER, ROUND_SIZE } from '../content/countries'
+import {
+  COUNTRIES,
+  COUNTRY_ORDER,
+  CURATED_CODES,
+  continentOfCode,
+  flagPool,
+} from '../content/countries'
 import { clearSeen } from '../content/seen'
 import {
   buildFlagQuestion,
   buildMapsEasyQuestion,
   buildMapsMediumQuestion,
   buildQuestion,
-  buildRound,
-  isCorrectChoice,
   modeKey,
   pickFlagDistractors,
-  pickRoundCountries,
   starsFromScore,
 } from './quiz'
 
@@ -34,32 +37,36 @@ describe('starsFromScore', () => {
   })
 })
 
-describe('pickRoundCountries', () => {
-  it('returns five unique countries', () => {
-    const ids = pickRoundCountries(ROUND_SIZE, sequential())
-    expect(ids).toHaveLength(5)
-    expect(new Set(ids).size).toBe(5)
-  })
-})
-
 describe('flag distractors', () => {
-  it('prefers similar flags for medium-style picks', () => {
-    const france = COUNTRIES.france
-    const picks = pickFlagDistractors(france, 3, () => 0)
+  it('prefers the look-alike flags the curated set calls out', () => {
+    const pool = flagPool('medium')
+    const picks = pickFlagDistractors('fr', pool, 3, () => 0)
     expect(picks).toHaveLength(3)
-    expect(picks).not.toContain('france')
-    expect(picks).toEqual(expect.arrayContaining(france.similarFlagIds))
+    expect(picks).not.toContain('fr')
+    const similar = COUNTRIES.france.similarFlagIds.map((id) => CURATED_CODES[id])
+    expect(picks).toEqual(expect.arrayContaining(similar))
+  })
+
+  it('falls back to the same continent before anywhere else', () => {
+    const picks = pickFlagDistractors('pe', flagPool('medium'), 3, () => 0)
+    expect(picks).toHaveLength(3)
+    // Peru has no curated look-alikes, so all three should be South American
+    expect(picks.map(continentOfCode)).toEqual([
+      'South America',
+      'South America',
+      'South America',
+    ])
   })
 
   it('easy flag questions use three choices', () => {
-    const q = buildFlagQuestion('japan', 'easy', sequential())
+    const q = buildFlagQuestion('jp', 'easy', sequential())
     expect(q.choiceCount).toBe(3)
     expect(q.choices).toHaveLength(3)
-    expect(q.choices).toContain('japan')
+    expect(q.choices).toContain('jp')
   })
 
   it('medium flag questions use four choices', () => {
-    const q = buildFlagQuestion('japan', 'medium', sequential())
+    const q = buildFlagQuestion('jp', 'medium', sequential())
     expect(q.choiceCount).toBe(4)
     expect(q.choices).toHaveLength(4)
   })
@@ -81,18 +88,6 @@ describe('maps questions', () => {
   })
 })
 
-describe('buildRound', () => {
-  it('builds five questions for each mode/difficulty', () => {
-    for (const mode of ['flags', 'maps'] as const) {
-      for (const difficulty of ['easy', 'medium'] as const) {
-        const round = buildRound(mode, difficulty, sequential())
-        expect(round).toHaveLength(5)
-        expect(isCorrectChoice(round[0], round[0].countryId)).toBe(true)
-      }
-    }
-  })
-})
-
 describe('modeKey', () => {
   it('joins mode and difficulty', () => {
     expect(modeKey('flags', 'easy')).toBe('flags-easy')
@@ -105,18 +100,22 @@ describe('buildQuestion rotation', () => {
     clearSeen()
   })
 
-  it('asks every country once before repeating any', () => {
-    const asked = Array.from({ length: COUNTRY_ORDER.length }, () =>
-      buildQuestion('flags', 'easy').countryId,
+  it('asks every flag once before repeating any', () => {
+    const pool = flagPool('easy')
+    const asked = Array.from(
+      { length: pool.length },
+      () => buildQuestion('flags', 'easy').countryId,
     )
-    expect(new Set(asked).size).toBe(COUNTRY_ORDER.length)
+    expect(new Set(asked).size).toBe(pool.length)
   })
 
   it('does not bring a country back for most of the next lap', () => {
-    const asked = Array.from({ length: COUNTRY_ORDER.length * 2 }, () =>
-      buildQuestion('flags', 'easy').countryId,
+    const size = COUNTRY_ORDER.length
+    const asked = Array.from(
+      { length: size * 2 },
+      () => buildQuestion('maps', 'easy').countryId,
     )
-    // gap between two askings of the same country, in questions
+    // closest gap between two askings of the same country, in questions
     const lastAt = new Map<string, number>()
     let closest = Infinity
     asked.forEach((id, at) => {
@@ -124,15 +123,28 @@ describe('buildQuestion rotation', () => {
       if (prev !== undefined) closest = Math.min(closest, at - prev)
       lastAt.set(id, at)
     })
-    expect(closest).toBeGreaterThanOrEqual(COUNTRY_ORDER.length / 2)
+    expect(closest).toBeGreaterThanOrEqual(size / 2)
   })
 
   it('rotates flags and maps independently', () => {
-    const flags = buildQuestion('flags', 'easy').countryId
-    const seenByMaps = Array.from({ length: COUNTRY_ORDER.length }, () =>
-      buildQuestion('maps', 'easy').countryId,
+    // a full lap of flags must not eat into the maps rotation
+    const pool = flagPool('easy')
+    for (let i = 0; i < pool.length; i += 1) buildQuestion('flags', 'easy')
+    const maps = Array.from(
+      { length: COUNTRY_ORDER.length },
+      () => buildQuestion('maps', 'easy').countryId,
     )
-    // the maps lap still covers everything, including what flags just asked
-    expect(seenByMaps).toContain(flags)
+    expect(new Set(maps).size).toBe(COUNTRY_ORDER.length)
+  })
+
+  it('keeps easy and medium pools on separate rotations', () => {
+    const easy = flagPool('easy')
+    for (let i = 0; i < easy.length; i += 1) buildQuestion('flags', 'easy')
+    const medium = flagPool('medium')
+    const asked = Array.from(
+      { length: medium.length },
+      () => buildQuestion('flags', 'medium').countryId,
+    )
+    expect(new Set(asked).size).toBe(medium.length)
   })
 })

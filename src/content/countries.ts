@@ -1,4 +1,5 @@
 /** Curated countries for Know the Countries (offline). */
+import { WORLD_COUNTRIES } from './worldCountries'
 
 export type Continent =
   | 'Asia'
@@ -184,4 +185,90 @@ export function regionLabel(id: MapRegionId): string {
 
 export function isCountryId(id: string): id is CountryId {
   return COUNTRY_ORDER.includes(id as CountryId)
+}
+
+/* ---------------------------------------------------------------------------
+ * The wide flag pool.
+ *
+ * Flags mode draws from every UN member state; maps mode stays on the curated
+ * twelve, because each map board and its hotspots are hand-drawn. Ids are ISO
+ * codes out here and slugs for the curated set, so getInfo resolves both.
+ * ------------------------------------------------------------------------- */
+
+/** ISO code for each curated country, so its flag can come from the CDN too. */
+export const CURATED_CODES: Record<CountryId, string> = {
+  india: 'in',
+  japan: 'jp',
+  china: 'cn',
+  australia: 'au',
+  egypt: 'eg',
+  'south-africa': 'za',
+  france: 'fr',
+  italy: 'it',
+  'united-kingdom': 'gb',
+  canada: 'ca',
+  'united-states': 'us',
+  brazil: 'br',
+}
+
+export type CountryInfo = {
+  code: string
+  name: string
+  continent: Continent
+  fact: string
+}
+
+const WORLD_BY_CODE = new Map(WORLD_COUNTRIES.map((c) => [c.code, c]))
+
+/** flagcdn is keyless and CORS-open, and serves SVG so it stays sharp. */
+export function flagUrl(code: string): string {
+  return `https://flagcdn.com/${code}.svg`
+}
+
+/**
+ * What the play screen shows, for a curated slug or a plain ISO code. Curated
+ * countries keep their hand-written fact; the rest get their capital, which is
+ * always true and always reads at the right level.
+ */
+export function getInfo(id: string): CountryInfo {
+  // maps pass a slug, flags pass an ISO code — both must find the curated entry,
+  // or the twelve hand-written facts go dead in flags mode
+  const curatedId = id in COUNTRIES ? (id as CountryId) : curatedIdForCode(id)
+  const curated = curatedId ? COUNTRIES[curatedId] : undefined
+  if (curated) {
+    return {
+      code: CURATED_CODES[curated.id],
+      name: curated.name,
+      continent: curated.continent,
+      fact: curated.fact,
+    }
+  }
+  const world = WORLD_BY_CODE.get(id)
+  if (world) {
+    return {
+      code: world.code,
+      name: world.name,
+      continent: world.continent,
+      fact: `${world.capital} is the capital of ${world.name}.`,
+    }
+  }
+  return { code: id, name: regionLabel(id as MapRegionId) ?? id, continent: 'Asia', fact: '' }
+}
+
+/** Easy keeps to countries a child is likely to know; Medium opens it up. */
+export function flagPool(difficulty: 'easy' | 'medium'): string[] {
+  const rows =
+    difficulty === 'easy'
+      ? WORLD_COUNTRIES.filter((c) => c.tier === 1)
+      : WORLD_COUNTRIES
+  return rows.map((c) => c.code)
+}
+
+export function continentOfCode(code: string): Continent | undefined {
+  return WORLD_BY_CODE.get(code)?.continent
+}
+
+/** The hand-drawn flag for a code, when there is one — the offline fallback. */
+export function curatedIdForCode(code: string): CountryId | undefined {
+  return COUNTRY_ORDER.find((id) => CURATED_CODES[id] === code)
 }

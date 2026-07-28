@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { playSfx, stopBgm } from '../audio/sounds'
 import { SoundToggle } from '../components/SoundToggle'
-import { getCountry, type MapRegionId } from '../content/countries'
-import { FlagSvg } from '../content/flags/FlagSvg'
+import { getInfo, type MapRegionId } from '../content/countries'
+import { Flag } from '../content/flags/Flag'
 import { ContinentMap } from '../content/maps/ContinentMap'
 import {
   buildQuestion,
@@ -41,7 +41,7 @@ export function CountriesPlay({
   const [nudge, setNudge] = useState('')
   const [wasCorrect, setWasCorrect] = useState(false)
 
-  const country = getCountry(question.countryId)
+  const country = getInfo(question.countryId)
 
   useEffect(() => {
     stopBgm()
@@ -102,7 +102,9 @@ export function CountriesPlay({
   const praise = PRAISE[asked % PRAISE.length]
   const showNameChoices =
     question.kind === 'flags' || question.kind === 'maps-easy'
-  const revealedId = phase === 'reveal' ? question.countryId : null
+  // only the map branches use this, and those questions carry a curated id
+  const revealedId =
+    phase === 'reveal' ? (question.countryId as MapRegionId) : null
 
   return (
     <main className="screen countries-play">
@@ -125,11 +127,7 @@ export function CountriesPlay({
 
       {question.kind === 'flags' ? (
         <div className="flag-stage">
-          <FlagSvg
-            id={question.countryId}
-            className="flag-hero"
-            title="Mystery flag"
-          />
+          <Flag code={country.code} className="flag-hero" title="Mystery flag" />
         </div>
       ) : null}
 
@@ -174,7 +172,7 @@ export function CountriesPlay({
           aria-label="Country choices"
         >
           {question.choices.map((id) => {
-            const c = getCountry(id)
+            const c = getInfo(id)
             let cls = 'countries-choice'
             if (phase === 'reveal') {
               if (id === question.countryId) cls += ' correct'

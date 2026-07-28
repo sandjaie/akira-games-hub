@@ -60,6 +60,37 @@ Jumbled Words uses curated local lists so every word keeps its exact picture clu
 
 Recently seen words are remembered for the browser tab session so the next round prefers new ones.
 
+## Flags and country data
+
+Flags mode covers **every UN member state** (194). Flag artwork comes from
+[flagcdn.com](https://flagcdn.com) as SVG — keyless, CORS-open, and sharp at any
+size, so nobody has to draw a flag.
+
+Difficulty picks the pool: **Easy** is 55 countries a child is likely to have
+heard of, **Medium** opens it to all 194. The two rotate separately, so a lap of
+Easy does not eat into Medium.
+
+The country list itself (`src/content/worldCountries.ts`) is **generated and
+committed**, not fetched:
+
+```bash
+node scripts/gen-countries.mjs
+```
+
+Source is [mledoze/countries](https://github.com/mledoze/countries), the dataset
+REST Countries is itself built on. Names, ISO codes and capitals change about
+once a decade, so fetching them at runtime buys nothing and costs an outage
+every time an API deprecates a version — REST Countries v3.1 now returns an
+error and v5 requires an API key, which a browser-only app cannot keep secret
+anyway (`VITE_*` values are inlined into the bundle).
+
+The twelve original countries keep their hand-written kid facts and their
+hand-drawn SVG flags, which are also the offline fallback if the CDN is
+unreachable. Everything else gets its capital city as the fact — always true,
+always the right reading level.
+
+Maps mode stays on those twelve: each board and hotspot is hand-drawn.
+
 ## Space Explorer content, and how it stays fresh
 
 Space Explorer has two doors: **Learn** (illustrated fact cards per mission) and

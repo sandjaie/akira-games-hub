@@ -1,9 +1,11 @@
 import {
   COUNTRIES,
   COUNTRY_ORDER,
+  CURATED_CODES,
+  continentOfCode,
+  flagPool,
   MAP_BOARD_REGIONS,
   ROUND_SIZE,
-  type Country,
   type CountryId,
   type MapBoardId,
   type MapRegionId,
@@ -21,10 +23,11 @@ export type CountriesModeKey =
 
 export type RoundStars = 0 | 1 | 2 | 3
 
+/** Flags run on ISO codes: the pool is every UN member, not the curated set. */
 export type FlagQuestion = {
   kind: 'flags'
-  countryId: CountryId
-  choices: CountryId[]
+  countryId: string
+  choices: string[]
   choiceCount: 3 | 4
 }
 
@@ -75,39 +78,55 @@ function shuffle<T>(items: T[], random: () => number = Math.random): T[] {
   return out
 }
 
-export function pickRoundCountries(
-  count: number = ROUND_SIZE,
-  random: () => number = Math.random,
-): CountryId[] {
-  return shuffle(COUNTRY_ORDER, random).slice(0, Math.min(count, COUNTRY_ORDER.length))
-}
-
 function otherCountryIds(exclude: CountryId): CountryId[] {
   return COUNTRY_ORDER.filter((id) => id !== exclude)
 }
 
-/** Prefer similar flags, then fill from the rest. */
+/** Flags the curated set calls out as look-alikes, as ISO codes. */
+function similarCodes(code: string): string[] {
+  const curated = Object.values(COUNTRIES).find(
+    (c) => CURATED_CODES[c.id] === code,
+  )
+  return (curated?.similarFlagIds ?? []).map((id) => CURATED_CODES[id])
+}
+
+/**
+ * Look-alike flags first, then the same continent, then anywhere. Same-continent
+ * wrong answers are the ones worth thinking about; a random far-flung country
+ * gives the answer away.
+ */
 export function pickFlagDistractors(
-  country: Country,
+  code: string,
+  pool: string[],
   count: number,
   random: () => number = Math.random,
-): CountryId[] {
-  const similar = country.similarFlagIds.filter((id) => id !== country.id)
-  const rest = otherCountryIds(country.id).filter((id) => !similar.includes(id))
-  const pool = [...shuffle(similar, random), ...shuffle(rest, random)]
-  return pool.slice(0, count)
+): string[] {
+  const others = pool.filter((c) => c !== code)
+  const similar = similarCodes(code).filter((c) => others.includes(c))
+  const continent = continentOfCode(code)
+  const near = others.filter(
+    (c) => !similar.includes(c) && continentOfCode(c) === continent,
+  )
+  const far = others.filter(
+    (c) => !similar.includes(c) && !near.includes(c),
+  )
+  return [
+    ...shuffle(similar, random),
+    ...shuffle(near, random),
+    ...shuffle(far, random),
+  ].slice(0, count)
 }
 
 export function buildFlagQuestion(
-  countryId: CountryId,
+  code: string,
   difficulty: CountriesDifficulty,
   random: () => number = Math.random,
 ): FlagQuestion {
-  const country = COUNTRIES[countryId]
   const choiceCount: 3 | 4 = difficulty === 'easy' ? 3 : 4
-  const distractors = pickFlagDistractors(country, choiceCount - 1, random)
-  const choices = shuffle([countryId, ...distractors], random)
-  return { kind: 'flags', countryId, choices, choiceCount }
+  const pool = flagPool(difficulty)
+  const distractors = pickFlagDistractors(code, pool, choiceCount - 1, random)
+  const choices = shuffle([code, ...distractors], random)
+  return { kind: 'flags', countryId: code, choices, choiceCount }
 }
 
 export function buildMapsEasyQuestion(
@@ -148,9 +167,17 @@ export function buildMapsMediumQuestion(
   }
 }
 
-/** Flags and maps rotate separately: knowing a flag is not knowing the map. */
-function seenKey(mode: CountriesMode, id: CountryId): string {
-  return `country:${mode}:${id}`
+/**
+ * Flags and maps rotate separately (knowing a flag is not knowing the map), and
+ * so do the difficulties, or a lap of Easy would poison the much larger Medium
+ * pool it is a subset of.
+ */
+function seenKey(
+  mode: CountriesMode,
+  difficulty: CountriesDifficulty,
+  id: string,
+): string {
+  return `country:${mode}:${difficulty}:${id}`
 }
 
 /**
@@ -166,34 +193,24 @@ function freshWindow(poolSize: number): number {
 export function buildQuestion(
   mode: CountriesMode,
   difficulty: CountriesDifficulty,
-  avoid: CountryId | null = null,
+  avoid: string | null = null,
   random: () => number = Math.random,
 ): CountriesQuestion {
-  const pool = COUNTRY_ORDER.filter((id) => id !== avoid)
-  const key = (id: CountryId) => seenKey(mode, id)
+  // maps stay on the curated twelve — every board and hotspot is hand-drawn
+  const all = mode === 'flags' ? flagPool(difficulty) : COUNTRY_ORDER
+  const pool = all.filter((id) => id !== avoid)
+  const key = (id: string) => seenKey(mode, difficulty, id)
   // anything never asked comes first, so a lap covers every country before
   // any of them comes round again
   const never = unseen(pool, key)
   const candidates =
     never.length > 0 ? never : pickFresh(pool, freshWindow(pool.length), key)
   const id = candidates[Math.floor(random() * candidates.length)]
-  markSeen(seenKey(mode, id))
+  markSeen(key(id))
   if (mode === 'flags') return buildFlagQuestion(id, difficulty, random)
-  if (difficulty === 'easy') return buildMapsEasyQuestion(id, random)
-  return buildMapsMediumQuestion(id)
-}
-
-export function buildRound(
-  mode: CountriesMode,
-  difficulty: CountriesDifficulty,
-  random: () => number = Math.random,
-): CountriesQuestion[] {
-  const ids = pickRoundCountries(ROUND_SIZE, random)
-  return ids.map((id) => {
-    if (mode === 'flags') return buildFlagQuestion(id, difficulty, random)
-    if (difficulty === 'easy') return buildMapsEasyQuestion(id, random)
-    return buildMapsMediumQuestion(id)
-  })
+  const countryId = id as CountryId
+  if (difficulty === 'easy') return buildMapsEasyQuestion(countryId, random)
+  return buildMapsMediumQuestion(countryId)
 }
 
 export function isCorrectChoice(
