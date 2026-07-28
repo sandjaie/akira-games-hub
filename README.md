@@ -20,6 +20,7 @@ From the hub, pick:
 - **Jumbled Words** — unscramble letter tiles (Easy / Medium)
 - **Know the Countries** — flags and real maps (Easy / Medium)
 - **Space Explorer** — learn space facts, then quiz yourself
+- **Tamizh · தமிழ்** — Thirukkural with kid-friendly Tamil & English meanings
 
 ## Play on iPad (same Wi‑Fi)
 
@@ -129,6 +130,19 @@ laser into Sky Science:
 What no rule catches is named explicitly in `REJECT`. That list is the honest
 part: when a rule cannot express "a six-year-old does not need this", somebody
 has to sign off on a name.
+
+## Generating Thirukkural for kids
+
+`src/content/thirukkural/kurals.generated.ts` holds all **1,330** couplets with
+kid-friendly Tamil and English meanings. To refresh from the open source JSON:
+
+```bash
+node scripts/gen-thirukkural.mjs
+```
+
+Tamil lines stay authentic. Meanings are rewritten at build time for ages ~5–10
+(Caring Hearts book is softened to age-safe caring language). Chapters live in
+`chapters.generated.ts`.
 
 ## Flags and country data
 

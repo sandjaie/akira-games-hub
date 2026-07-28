@@ -16,6 +16,7 @@ type Props = {
   onJumbled: () => void
   onCountries: () => void
   onSpace: () => void
+  onTamizh: () => void
 }
 
 function MakerNote() {
@@ -38,6 +39,7 @@ export function Welcome({
   onJumbled,
   onCountries,
   onSpace,
+  onTamizh,
 }: Props) {
   const [draft, setDraft] = useState(name)
 
@@ -181,6 +183,19 @@ export function Welcome({
           <span>
             <span className="hub-title">Space Explorer</span>
             <span className="hub-blurb">Learn space facts, then quiz!</span>
+          </span>
+        </button>
+        <button
+          type="button"
+          className="hub-card tamizh"
+          onClick={() => pick(onTamizh)}
+        >
+          <span className="hub-icon" aria-hidden="true">
+            📜
+          </span>
+          <span>
+            <span className="hub-title">Tamizh · தமிழ்</span>
+            <span className="hub-blurb">Thirukkural for kids</span>
           </span>
         </button>
       </div>

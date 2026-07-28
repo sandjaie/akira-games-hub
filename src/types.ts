@@ -5,6 +5,7 @@ import type {
 } from './countries/quiz'
 import type { JumbledDifficulty } from './content/jumbledWords'
 import type { MissionId } from './content/space'
+import type { PaalId } from './content/thirukkural'
 import type { WordLevelId } from './content/wordLevels'
 import type { SpaceStars } from './space/quiz'
 
@@ -59,6 +60,10 @@ export type Screen =
       asked: number
       stars: SpaceStars
     }
+  | { name: 'tamizh-home' }
+  | { name: 'thirukkural-paals' }
+  | { name: 'thirukkural-chapters'; paalId: PaalId }
+  | { name: 'thirukkural-read'; chapterId: number; index?: number }
 
 export type LabProgress = { completed: StationId[] }
 
@@ -83,12 +88,17 @@ export type SpaceProgress = {
   bestStars: Partial<Record<MissionId, 1 | 2 | 3>>
 }
 
+export type TamizhProgress = {
+  readChapterIds: number[]
+}
+
 export type AppProgress = {
   lab: LabProgress
   words: WordsProgress
   jumbled: JumbledProgress
   countries: CountriesProgress
   space: SpaceProgress
+  tamizh: TamizhProgress
 }
 
 export type GameKind =

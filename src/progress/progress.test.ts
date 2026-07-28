@@ -10,6 +10,7 @@ import {
   isLabComplete,
   isLaptopUnlocked,
   loadProgress,
+  recordChapterRead,
   recordCountriesRound,
   recordJumbledRound,
   recordTypedWord,
@@ -83,6 +84,7 @@ describe('progress', () => {
       jumbled: { completedDifficulties: [], bestStars: {} },
       countries: { completedModes: [], bestStars: {} },
       space: { learnedMissionIds: [], bestStars: {} },
+      tamizh: { readChapterIds: [] },
     })
     const p = loadProgress()
     expect(p.words.unlockedLevelIds).toContain('animals')
@@ -149,5 +151,32 @@ describe('progress', () => {
 
   it('word level order matches content module', () => {
     expect(WORD_LEVEL_ORDER[0]).toBe('animals')
+  })
+
+  it('migrates progress missing tamizh bucket', () => {
+    localStorage.setItem(
+      'cla-progress',
+      JSON.stringify({
+        lab: { completed: ['monitor'] },
+        words: {
+          unlockedLevelIds: ['animals'],
+          completedLevelIds: [],
+          wordsTypedCount: 0,
+        },
+        jumbled: { completedDifficulties: [], bestStars: {} },
+        countries: { completedModes: [], bestStars: {} },
+        space: { learnedMissionIds: [], bestStars: {} },
+      }),
+    )
+    const p = loadProgress()
+    expect(p.tamizh.readChapterIds).toEqual([])
+  })
+
+  it('records read thirukkural chapters without duplicates', () => {
+    let tamizh = loadProgress().tamizh
+    tamizh = recordChapterRead(tamizh, 1)
+    tamizh = recordChapterRead(tamizh, 1)
+    tamizh = recordChapterRead(tamizh, 2)
+    expect(tamizh.readChapterIds).toEqual([1, 2])
   })
 })

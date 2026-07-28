@@ -8,6 +8,7 @@ import type { JumbledDifficulty } from '../content/jumbledWords'
 import { LAB_ORDER } from '../content/stations'
 import { WORD_LEVEL_ORDER, type WordLevelId } from '../content/wordLevels'
 import { MISSION_ORDER, type MissionId } from '../content/space'
+import { CHAPTERS } from '../content/thirukkural'
 import type { SpaceStars } from '../space/quiz'
 import type {
   AppProgress,
@@ -17,8 +18,11 @@ import type {
   LabProgress,
   LabStationId,
   StationId,
+  TamizhProgress,
   WordsProgress,
 } from '../types'
+
+const CHAPTER_IDS = new Set(CHAPTERS.map((c) => c.id))
 
 const KEY = 'cla-progress'
 
@@ -60,6 +64,10 @@ export function emptySpaceProgress(): SpaceProgress {
   }
 }
 
+export function emptyTamizhProgress(): TamizhProgress {
+  return { readChapterIds: [] }
+}
+
 export function emptyProgress(): AppProgress {
   return {
     lab: { completed: [] },
@@ -67,6 +75,7 @@ export function emptyProgress(): AppProgress {
     jumbled: emptyJumbledProgress(),
     countries: emptyCountriesProgress(),
     space: emptySpaceProgress(),
+    tamizh: emptyTamizhProgress(),
   }
 }
 
@@ -124,6 +133,13 @@ function normalizeSpace(raw: Partial<SpaceProgress> | undefined): SpaceProgress 
   return { learnedMissionIds: learned, bestStars }
 }
 
+function normalizeTamizh(raw: Partial<TamizhProgress> | undefined): TamizhProgress {
+  const readChapterIds = (raw?.readChapterIds ?? []).filter(
+    (id): id is number => typeof id === 'number' && CHAPTER_IDS.has(id),
+  )
+  return { readChapterIds: [...new Set(readChapterIds)] }
+}
+
 export function loadProgress(): AppProgress {
   try {
     const raw = localStorage.getItem(KEY)
@@ -136,6 +152,7 @@ export function loadProgress(): AppProgress {
         jumbled: emptyJumbledProgress(),
         countries: emptyCountriesProgress(),
         space: emptySpaceProgress(),
+        tamizh: emptyTamizhProgress(),
       }
     }
     const lab = parsed.lab as LabProgress | undefined
@@ -148,6 +165,7 @@ export function loadProgress(): AppProgress {
         parsed.countries as CountriesProgress | undefined,
       ),
       space: normalizeSpace(parsed.space as SpaceProgress | undefined),
+      tamizh: normalizeTamizh(parsed.tamizh as TamizhProgress | undefined),
     }
   } catch {
     return emptyProgress()
@@ -270,4 +288,13 @@ export function recordMissionQuiz(
   const best = space.bestStars[id]
   if (best && best >= stars) return space
   return { ...space, bestStars: { ...space.bestStars, [id]: stars } }
+}
+
+export function recordChapterRead(
+  tamizh: TamizhProgress,
+  chapterId: number,
+): TamizhProgress {
+  if (!CHAPTER_IDS.has(chapterId)) return tamizh
+  if (tamizh.readChapterIds.includes(chapterId)) return tamizh
+  return { readChapterIds: [...tamizh.readChapterIds, chapterId] }
 }
