@@ -13,10 +13,10 @@ Add a **Tamizh** hub section with **Thirukkural**: all **1,330** couplets in Tam
 | Topic | Choice |
 |-------|--------|
 | Hub entry | New Welcome card: **Tamizh** |
-| Content | Bundled offline JSON (no runtime API) |
+| Content | Bundled offline JSON (no runtime API); Kaamathupaal + adult adhikarams omitted |
 | Source text | Open Thirukkural JSON (Tamil lines + commentaries) |
 | Kid meanings | Build-time rewrite: Tamil from clear modern commentary; English simplified for read-aloud |
-| Navigation | Hub → Tamizh → Paal → Chapter (10 kurals) → one-kural cards |
+| Navigation | Hub → Tamizh → Paal (Aram / Porul) → Chapter (10 kurals) → one-kural cards |
 | Progress | Chapters marked read when the last kural is reached |
 | Quiz | Out of scope for this pass (learn/browse only) |
 
